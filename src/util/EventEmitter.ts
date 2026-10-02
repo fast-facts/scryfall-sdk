@@ -89,12 +89,12 @@ class EventEmitter implements NodeEventEmitter {
 		return this._maxListeners;
 	}
 
-	public listeners (eventName: string | symbol): Function[] {
+	public listeners (eventName: string | symbol): Listener[] {
 		const listeners = this._listeners[eventName];
 		return listeners ? [...listeners] : EMPTY;
 	}
 
-	public rawListeners (eventName: string | symbol): Function[] {
+	public rawListeners (eventName: string | symbol): Listener[] {
 		throw new Error("The rawListeners method is not available using this polyfill");
 	}
 
