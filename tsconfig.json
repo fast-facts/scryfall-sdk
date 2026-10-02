@@ -15,8 +15,6 @@
 		"experimentalDecorators": true
 	},
     "include": [
-        "gulpfile.ts",
-        "gulp/**/*.ts",
         ".eslintrc.ts"
     ]
 }

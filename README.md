@@ -53,13 +53,17 @@ npm install
 ```
 You can now make changes to the repository. 
 
-To compile, then test:
+To compile:
 ```bat
-gulp build
+npm run build
 ```
-To compile and then test on every file change:
+To compile on every file change:
 ```bat
-gulp watch
+npm run watch
+```
+To test, after a compile:
+```bat
+npm test
 ```
 
 
