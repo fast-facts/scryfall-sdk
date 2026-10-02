@@ -5,7 +5,4 @@ out/tests/
 
 .gitattributes
 .gitignore
-tsconfig.json
-.eslintrc.ts
-.eslintrc.js
-.eslintignore
+eslint.config.js
