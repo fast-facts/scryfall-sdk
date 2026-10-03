@@ -1,6 +1,10 @@
 # scryfall-sdk-updated
-[![npm](https://img.shields.io/npm/v/scryfall-sdk-updated.svg?style=flat-square)](https://www.npmjs.com/package/scryfall-sdk-updated)
-[![GitHub issues](https://img.shields.io/github/issues/fast-facts/scryfall-sdk.svg?style=flat-square)](https://github.com/fast-facts/scryfall-sdk)
+
+[![version](https://img.shields.io/npm/v/scryfall-sdk-updated?style=for-the-badge&logo=npm&logoColor=white&label=version)](https://www.npmjs.com/package/scryfall-sdk-updated)
+[![downloads](https://img.shields.io/npm/dm/scryfall-sdk-updated?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/scryfall-sdk-updated)
+[![CI](https://img.shields.io/github/actions/workflow/status/fast-facts/scryfall-sdk/main.cron.publish.yml?branch=main&style=for-the-badge&logo=github&logoColor=white&label=CI)](https://github.com/fast-facts/scryfall-sdk/actions/workflows/main.cron.publish.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/fast-facts/scryfall-sdk/main.cron.code-analyze.yml?branch=main&style=for-the-badge&logo=github&logoColor=white&label=CodeQL)](https://github.com/fast-facts/scryfall-sdk/actions/workflows/main.cron.code-analyze.yml)
+[![license](https://img.shields.io/github/license/fast-facts/scryfall-sdk?style=for-the-badge)](./LICENSE)
 
 A Node.js SDK for [Scryfall](https://scryfall.com/docs/api) written in Typescript.
 
