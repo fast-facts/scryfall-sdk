@@ -23,23 +23,16 @@
 		"url": "https://github.com/ChiriVulpes/scryfall-sdk"
 	},
 	"devDependencies": {
-		"@types/chai": "4.3.4",
-		"@types/chai-as-promised": "7.1.5",
-		"@types/mocha": "10.0.6",
-		"@types/node": "^18",
-		"@types/request-promise": "4.1.48",
-		"chai": "4.3.7",
-		"chai-as-promised": "7.1.1",
+		"@types/node": "^26.6.4",
 		"eslint-config-final": "1.11.0",
-		"fuzzysort": "2.0.4",
-		"mocha": "10.2.0",
-		"typescript": "4.9.5",
-		"typescript-eslint": "8.71.0"
+		"typescript": "6.0.3",
+		"typescript-eslint": "8.71.0",
+		"vitest": "5.0.3"
 	},
 	"scripts": {
-		"build": "rm -rf out && tsc -p src",
-		"watch": "tsc -p src --watch",
-		"test": "mocha out/tests/Main.js",
+		"build": "rm -rf out && tsc -p tsconfig.app.json",
+		"watch": "tsc -p tsconfig.app.json --watch",
+		"test": "vitest run",
 		"lint": "eslint ."
 	}
 }

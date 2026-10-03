@@ -1,8 +1,12 @@
 .vscode/
 .github/
 src/
-out/tests/
 
 .gitattributes
 .gitignore
-eslint.config.js
+eslint.config.mjs
+vitest.config.mts
+vitest.setup.ts
+tsconfig.json
+tsconfig.app
+tsconfig.spec.json

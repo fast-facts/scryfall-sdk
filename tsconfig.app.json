@@ -1,0 +1,26 @@
+{
+	"compilerOptions": {
+		"target": "es2015",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"outDir": "out",
+		"rootDir": "src",
+		"declaration": true,
+		"experimentalDecorators": true,
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": false,
+		"strict": true,
+		"strictPropertyInitialization": false,
+		"types": [
+			"node"
+		]
+	},
+	"include": [
+		"src/**/*.ts"
+	],
+	"exclude": [
+		"src/**/*.spec.ts"
+	]
+}

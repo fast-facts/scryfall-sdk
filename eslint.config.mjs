@@ -6,11 +6,11 @@ export default tseslint.config(
 		ignores: [
 			"**/node_modules/",
 			"out/",
-			"eslint.config.js",
+			"eslint.config.mjs",
 		],
 	},
 	{
-		files: ["**/*.ts"],
+		files: ["**/*.ts", "**/*.mts"],
 
 		extends: [
 			...config.typescript,
@@ -21,7 +21,7 @@ export default tseslint.config(
 			sourceType: "script",
 
 			parserOptions: {
-				projectService: true,
+				project: ["./tsconfig.app.json", "./tsconfig.spec.json"],
 				tsconfigRootDir: import.meta.dirname,
 			},
 		},

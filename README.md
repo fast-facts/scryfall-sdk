@@ -61,7 +61,7 @@ To compile on every file change:
 ```bat
 npm run watch
 ```
-To test, after a compile:
+To test:
 ```bat
 npm test
 ```
