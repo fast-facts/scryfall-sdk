@@ -4,7 +4,7 @@
 - [Cards](#cards-)
   - [`Cards.byId (id: string): Promise<Card>;`](#cardsbyid-id-string-promisecard-)
   - [`Cards.byName (name: string, set?: string, fuzzy = false): Promise<Card>;`](#cardsbyname-name-string-set-string-fuzzy--false-promisecard-)
-  - [`Cards.bySet (setCode: string, collectorNumber: string | number, lang?: string): Promise<Card>;`](#cardsbyset-setcode-string-collectornumber-string--number-lang-string-promisecard-)
+  - [`Cards.bySet (setCode: string | Set, collectorNumber: string | number, lang?: string): Promise<Card>;`](#cardsbyset-setcode-string--set-collectornumber-string--number-lang-string-promisecard-)
   - [`Cards.byMultiverseId (id: number): Promise<Card>;` ](#cardsbymultiverseid-id-number-promisecard-)
   - [`Cards.byMtgoId (id: number): Promise<Card>;` ](#cardsbymtgoid-id-number-promisecard-)
   - [`Cards.byArenaId (id: number): Promise<Card>;` ](#cardsbyarenaid-id-number-promisecard-)
@@ -18,11 +18,15 @@
   - [`Card`](#card-)
     - [`Card.getSet (): Promise<Set>`](#cardgetset--promiseset-)
     - [`Card.getPrints (): Promise<Card[]>`](#cardgetprints--promisecard-)
-    - [`Card.getRulings (): Promise<Ruling[]>`](#cardgetrulings--promiserulings-)
+    - [`Card.getRulings (): Promise<Ruling[]>`](#cardgetrulings--promiseruling-)
     - [`Card.isLegal (format: Format): boolean`](#cardislegal-format-format-boolean-)
     - [`Card.isIllegal (format: Format): boolean`](#cardisillegal-format-format-boolean-)
-    - [`Card.getText (): string | null`](#cardgettext--string--null-)
-    - [`Card.getCost (): string | null`](#cardgetcost--string--null-)
+    - [`Card.getText (): string | null | undefined`](#cardgettext--string--null--undefined-)
+    - [`Card.getCost (): string | null | undefined`](#cardgetcost--string--null--undefined-)
+    - [`Card.getTokens (): RelatedCard[]`](#cardgettokens--relatedcard-)
+    - [`Card.getImageURI (version: keyof ImageUris): string | null | undefined`](#cardgetimageuri-version-keyof-imageuris-string--null--undefined-)
+    - [`Card.getFrontImageURI (version: keyof ImageUris): string | null | undefined`](#cardgetfrontimageuri-version-keyof-imageuris-string--null--undefined-)
+    - [`Card.getBackImageURI (version: keyof ImageUris): string | null | undefined`](#cardgetbackimageuri-version-keyof-imageuris-string--null--undefined-)
 - [Sets](#sets-)
   - [`Sets.byCode (code: string): Promise<Set>;` ](#setsbycode-code-string-promiseset-)
   - [`Sets.byId (id: string): Promise<Set>;` ](#setsbyid-id-string-promiseset-)
@@ -30,7 +34,7 @@
   - [`Sets.byName (name: string, fuzzy?: boolean): Promise<Set>;` ](#setsbyname-name-string-fuzzy-boolean-promiseset-)
   - [`Sets.all (): Promise<Set[]>;` ](#setsall--promiseset-)
   - [`Set`](#set-)
-    - [`Set.getCards (): Promise<Card[]>`](#setgetcards--promisecard-)
+    - [`Set.getCards (options?: SearchOptions): Promise<Card[]>`](#setgetcards-options-searchoptions-promisecard-)
     - [`Set.search (query: string, options?: SearchOptions): Promise<Card[]>`](#setsearch-query-string-options-searchoptions-promisecard-)
 - [Rulings](#rulings-)
   - [`Rulings.byId (id: string): Promise<Ruling[]>;` ](#rulingsbyid-id-string-promiseruling-)
@@ -60,19 +64,19 @@
   - [`Catalog.abilityWords (): Promise<string[]>;` ](#catalogabilitywords--promisestring-)
   - [`Catalog.supertypes (): Promise<string[]>;` ](#catalogsupertypes--promisestring-)
 - [Bulk Data](#bulk-data-)
-  - [`BulkData.downloadByType (type: BulkDataType): Promise<Stream | undefined>;`](#bulkdatadownloadbytype-type-bulkdatatype-promisestream--undefined-)
-  - [`BulkData.downloadById (id: string): Promise<Stream | undefined>;`](#bulkdatadownloadbyid-id-string-promisestream--undefined-)
+  - [`BulkData.downloadByType (type: BulkDataType, lastDownload: string | number | Date): Promise<ReadableStream | null | undefined>;`](#bulkdatadownloadbytype-type-bulkdatatype-lastdownload-string--number--date-promisereadablestream--null--undefined-)
+  - [`BulkData.downloadById (id: string, lastDownload: string | number | Date): Promise<ReadableStream | null | undefined>;`](#bulkdatadownloadbyid-id-string-lastdownload-string--number--date-promisereadablestream--null--undefined-)
   - [`BulkData.definitions (): Promise<BulkDataDefinition[]>;`](#bulkdatadefinitions--promisebulkdatadefinition-)
   - [`BulkData.definitionByType (type: BulkDataType): Promise<BulkDataDefinition>;`](#bulkdatadefinitionbytype-type-bulkdatatype-promisebulkdatadefinition-)
   - [`BulkData.definitionById (id: string): Promise<BulkDataDefinition>;`](#bulkdatadefinitionbyid-id-string-promisebulkdatadefinition-)
 - [Migrations](#migrations-)
   - [`Migrations.all (page?: number): MagicEmitter<Migration>;`](#migrationsall-page-number-magicemittermigration-)
-  - [`Migrations.byId (id: string): Promise<Migration>;`](#migrationsall-id-string-promisemigration-)
+  - [`Migrations.byId (id: string): Promise<Migration>;`](#migrationsbyid-id-string-promisemigration-)
 - [Misc](#misc-)
+  - [`setRetry (attempts: number, timeout?: number, canRetry?: (error: SearchError) => boolean): void;`](#setretry-attempts-number-timeout-number-canretry-error-searcherror--boolean-void-)
   - [`setTimeout (timeout: number): void;`](#settimeout-timeout-number-void-)
   - [Caching](#caching-)
-  - [`setRetry (attempts: number, timeout?: number, canRetry?: (error: SearchError) => boolean): void;`](#setretry-attempts-number-timeout-number-canretry-error-searcherror--boolean-void-)
-  - [`setFuzzySearch (search: <T>(search: string, targets: T[], key: keyof T) => T | undefined): void;`](#setfuzzysearch-search-tsearch-string-targets-t-key-keyof-t--t--undefined-void-)
+  - [`setFuzzySearch (search?: <T>(search: string, targets: T[], key: keyof T) => T | undefined): void;`](#setfuzzysearch-search-tsearch-string-targets-t-key-keyof-t--t--undefined-void-)
   - [`MagicEmitter<T, NOT_FOUND>`](#magicemittert-not_found-)
 
 
@@ -122,9 +126,9 @@ card = await Scry.Cards.byName("Warhammer", "MRD", true);
 console.log(card.name, card.set); // Loxodon Warhammer, mrd
 ```
 
-### `Cards.bySet (setCode: string, collectorNumber: string | number, lang?: string): Promise<Card>;` [🡅](#table-of-contents)
+### `Cards.bySet (setCode: string | Set, collectorNumber: string | number, lang?: string): Promise<Card>;` [🡅](#table-of-contents)
 
-Gets a card based on its set and collector id. You can use the optional `lang` argument to get cards in another language. See the [Scryfall Documentation for a list of all languages](https://scryfall.com/docs/api/languages).
+Gets a card based on its set and collector id. You can pass a set code or a `Set` object. You can use the optional `lang` argument to get cards in another language. See the [Scryfall Documentation for a list of all languages](https://scryfall.com/docs/api/languages).
 
 ```ts
 let card = await Scry.Cards.bySet("dgm", 22);
@@ -193,9 +197,9 @@ Scry.Cards.search("type:planeswalker")
   });
 ```
 
-For information on how to provide extra options, see the [`/get/cards/search` page](https://scryfall.com/docs/api/cards/search) on Scryfall. You can also reference the `SearchOptions` interface in [`Cards.ts`](./src/api/Cards.ts)
+For information on how to provide extra options, see the [`/cards/search` page](https://scryfall.com/docs/api/cards/search) on Scryfall. `SearchOptions` in [`Cards.ts`](./src/api/Cards.ts) is the set this SDK accepts. It does not include every sort order Scryfall documents.
 
-This query returns a [`MagicEmitter`](#magicemittert-).
+This query returns a [`MagicEmitter`](#magicemittert-not_found-).
 
 The page parameter is the page of results that the query will begin at. A page is 175 cards, and cannot be changed. To get only the one page you requested, you can do the following:
 
@@ -209,14 +213,14 @@ console.log(cardsFromPage7.length); // 175
 Gets a random card.
 
 ```ts
-const card = Scry.Cards.random();
+const card = await Scry.Cards.random();
 console.log(card.name); // some random card from all of magic
 ```
 
 Passing a query string parameter filters the pool of possible cards using the [Scryfall Search API](https://scryfall.com/docs/syntax) before selecting the random one to return.
 
 ```ts
-const card = Scry.Cards.random("type:planeswalker");
+const card = await Scry.Cards.random("type:planeswalker");
 console.log(card.name); // some random planeswalker card
 ```
 
@@ -255,8 +259,7 @@ In order to assist with manual requests, this method comes with a new set of fac
 - `Scry.CardIdentifier.byMtgoId(id: number): CardIdentifier;`
 - `Scry.CardIdentifier.byOracleId(id: string): CardIdentifier;`
 - `Scry.CardIdentifier.byIllustrationId(id: string): CardIdentifier;`
-- `Scry.CardIdentifier.byName(string: string, set?: string): CardIdentifier;`
-- `Scry.CardIdentifier.byName(string: string, set?: string): CardIdentifier;`
+- `Scry.CardIdentifier.byName(name: string, set?: string): CardIdentifier;`
 - `Scry.CardIdentifier.bySet(set: string, collectorNumber: string | number): CardIdentifier;`
 
 Example:
@@ -292,7 +295,7 @@ for (const card of cards) {
 
 Applies a symbology transformer to Card objects. Card objects contain a `mana_cost` and an `oracle_text` field, and these fields contain symbology formatted like `{U}`, `{8}`, `{B/W}`. A symbology transformer, if applied, will replace each symbol with something else.
 
-For performance, the symbology transformer is currently only applied in [`Card.getText`](#cardgettext--string--null-) and [`Card.getCost`](#cardgetcost--string--null-)
+For performance, the symbology transformer is currently only applied in [`Card.getText`](#cardgettext--string--null--undefined-) and [`Card.getCost`](#cardgetcost--string--null--undefined-)
 
 In the following example, a symbology transformer is added which can replace symbology with Discord emoji equivalents as seen in [Manamoji for Discord](https://github.com/scryfall/manamoji-discord):
 
@@ -359,7 +362,7 @@ console.log(card.isIllegal("standard")); // true
 console.log(card.isIllegal("vintage")); // false
 ```
 
-### `Card.getText (): string | null;` [🡅](#table-of-contents)
+### `Card.getText (): string | null | undefined;` [🡅](#table-of-contents)
 Returns the `oracle_text` of this card, if present, with any symbology transformed by the symbology transformer set in [`Cards.setSymbologyTransformer`](#cardssetsymbologytransformer-transformer-string--symbologytransformer-void-).
 
 This method is also present on card faces (`Card.card_faces`).
@@ -370,8 +373,8 @@ const card = await Scry.Cards.byId("be0e3547-d8cb-4b68-a396-8c8fbc3b2b1c");
 card.getText(); // :mana3::manaG:: Put a +1/+1 counter on Jungle Delver.
 ```
 
-### `Card.getCost (): string | null;` [🡅](#table-of-contents)
-Returns the `oracle_text` of this card, if present, with any symbology transformed by the symbology transformer set in [`Cards.setSymbologyTransformer`](#cardssetsymbologytransformer-transformer-string--symbologytransformer-void-).
+### `Card.getCost (): string | null | undefined;` [🡅](#table-of-contents)
+Returns the `mana_cost` of this card, if present, with any symbology transformed by the symbology transformer set in [`Cards.setSymbologyTransformer`](#cardssetsymbologytransformer-transformer-string--symbologytransformer-void-).
 
 This method is also present on card faces (`Card.card_faces`).
 
@@ -380,6 +383,24 @@ Scry.Cards.setSymbologyTransformer(":mana$1$2:");
 const card = await Scry.Cards.byId("a3f64ad2-4041-421d-baa2-206cedcecf0e");
 card.getCost(); // :mana1::manaWB::manaWB:
 ```
+
+### `Card.getTokens (): RelatedCard[];` [🡅](#table-of-contents)
+Returns the token cards listed in `all_parts`, or an empty array. Each related card has a `get()` method that loads the full card.
+
+```ts
+const card = await Scry.Cards.byName("Beast Within");
+const tokens = card.getTokens();
+const token = tokens[0] ? await tokens[0].get() : undefined;
+```
+
+### `Card.getImageURI (version: keyof ImageUris): string | null | undefined;` [🡅](#table-of-contents)
+Returns an image URI for this card. `version` is one of `small`, `normal`, `large`, `png`, `art_crop`, or `border_crop`. If the card has no top-level images, this uses the front face. This method is also present on card faces.
+
+### `Card.getFrontImageURI (version: keyof ImageUris): string | null | undefined;` [🡅](#table-of-contents)
+Returns an image URI for the front face, falling back to the card's top-level images.
+
+### `Card.getBackImageURI (version: keyof ImageUris): string | null | undefined;` [🡅](#table-of-contents)
+Returns an image URI for the back face of a `transform` or `double_faced_token` card. Other layouts get the generic card back.
 
 
 
@@ -417,9 +438,9 @@ console.log(set.name); // Hour of Devastation
 Gets a set by its name. The fuzzy search option is provided, but is not implemented into this module and must be provided via [`Scry.setFuzzySearch`](#setfuzzysearch-search-tsearch-string-targets-t-key-keyof-t--t--undefined-void-). If fuzzy search is enabled, but a search function has not been provided, an exact match will be returned instead.
 
 ```ts
-const set = await Scry.Sets.byName("hour of devastation");
+let set = await Scry.Sets.byName("hour of devastation");
 console.log(set.name); // Hour of Devastation
-const set = await Scry.Sets.byName("hou", true); // requires `Scry.setFuzzySearch`
+set = await Scry.Sets.byName("hou", true); // requires `Scry.setFuzzySearch`
 console.log(set.name); // Hour of Devastation
 ```
 
@@ -435,9 +456,9 @@ console.log(set.length); // 394
 ## `Set` [🡅](#table-of-contents)
 All sets returned by the SDK have the following methods.
 
-### `Set.getCards (): Promise<Card[]>;` [🡅](#table-of-contents)
+### `Set.getCards (options?: SearchOptions): Promise<Card[]>;` [🡅](#table-of-contents)
 
-Gets all the cards in this set.
+Gets all the cards in this set. You can pass search options to change the order or filters. `page` is not accepted; this method returns every match.
 
 ```ts
 const set = await Scry.Sets.byCode("hou");
@@ -447,7 +468,7 @@ console.log(cards.length); // 199
 
 ### `Set.search (query: string, options?: SearchOptions): Promise<Card[]>;` [🡅](#table-of-contents)
 
-Gets all cards in this set that match the given query.
+Gets all cards in this set that match the given query. `page` is not accepted; this method returns every match.
 
 ```ts
 const set = await Scry.Sets.byCode("hou");
@@ -656,8 +677,10 @@ console.log(supertypes.length); // 7
 
 ## Bulk Data [🡅](#table-of-contents)
 
-### `BulkData.downloadByType (type: BulkDataType): Promise<Stream | undefined>;` [🡅](#table-of-contents)
+### `BulkData.downloadByType (type: BulkDataType, lastDownload: string | number | Date): Promise<ReadableStream | null | undefined>;` [🡅](#table-of-contents)
 Returns a stream for a bulk data file by its type, or `undefined` if the bulk data file hasn't been updated since the last download time.
+
+`type` is `oracle_cards`, `unique_artwork`, `default_cards`, `all_cards`, or `rulings`.
 
 ```ts
 /**
@@ -678,7 +701,7 @@ if (rulingsStream)
     rulingsStream.pipe(fs.createWriteStream("rulings.json"));
 ```
 
-### `BulkData.downloadById (id: string): Promise<Stream | undefined>;` [🡅](#table-of-contents)
+### `BulkData.downloadById (id: string, lastDownload: string | number | Date): Promise<ReadableStream | null | undefined>;` [🡅](#table-of-contents)
 Returns a stream for a bulk data file by its id, or `undefined` if the bulk data file hasn't been updated since the last download time.
 
 ```ts
@@ -688,7 +711,7 @@ console.log(download); // either a stream or undefined
 ```
 
 ### `BulkData.definitions (): Promise<BulkDataDefinition[]>;` [🡅](#table-of-contents)
-Returns the definitions of all bulk data files that Scryfall is currently providing.
+Returns the definitions of all bulk data files that Scryfall is currently providing. That list can include tag files. `BulkDataType` only names `oracle_cards`, `unique_artwork`, `default_cards`, `all_cards`, and `rulings`, so `definitionByType` and `downloadByType` do not accept the tag file names.
 
 ```ts
 const definitions = await Scry.BulkData.definitions();
@@ -773,7 +796,9 @@ Scry.setRetry(3, 1000, error => error.code == "some_code");
 
 ### `setTimeout (timeout: number): void;` [🡅](#table-of-contents)
 
-Sets the length of time that must pass between API calls. By default, 100ms is used. This method will prevent you from setting the timeout to a shorter time than 50ms, which is the minimum time between calls that Scryfall requests.
+Sets the delay between API calls. The default is 100ms. The SDK will not go below 50ms.
+
+Scryfall's own limits are stricter on some routes: 100ms for most endpoints, and 500ms for `/cards/search`, `/cards/named`, `/cards/random`, and `/cards/collection`. Use at least 500ms if you call those routes back to back.
 
 Example usage:
 ```ts
@@ -789,9 +814,9 @@ Many, but not all query functions cache their results. For example, trying to ge
 #### Notes:
 - By default, scryfall-sdk uses a cache duration of 1 hour.
 - The minimum supported cache time is 10 seconds. Putting a value lower than this disables caching entirely.
-- **A cached value expiring does not immediately remove it.** If your application needs to conserve memory, consider lowering the cache limit with `setCacheMaxObjects`. If this is keeping your application open, use `Scry.clearCache()`
+- **A cached value expiring does not immediately remove it.** If your application needs to conserve memory, lower the cache limit with `setCacheLimit`. If cached results are keeping your application open, use `Scry.clearCache()`
 
-#### `setCacheDuration (timeout: number): void;` [🡅](#table-of-contents)
+#### `setCacheDuration (ms: number): void;` [🡅](#table-of-contents)
 
 Example usage:
 ```ts
@@ -814,9 +839,17 @@ Scry.setCacheLimit(10);
 Scry.setCacheLimit(0);
 ```
 
-#### `setFuzzySearch (search: <T>(search: string, targets: T[], key: keyof T) => T | undefined): void;` [🡅](#table-of-contents)
+#### `clearCache (): void;` [🡅](#table-of-contents)
 
-Sets a fuzzy search function for use in [`Scry.Sets.byName`](#setsbyname-name-string-fuzzy-boolean-promiseset-), and, potentially, other methods implemented in the future.
+Clears every cached query result.
+
+```ts
+Scry.clearCache();
+```
+
+#### `setFuzzySearch (search?: <T>(search: string, targets: T[], key: keyof T) => T | undefined): void;` [🡅](#table-of-contents)
+
+Sets a fuzzy search function for use in [`Scry.Sets.byName`](#setsbyname-name-string-fuzzy-boolean-promiseset-). Leave it out to clear the function.
 
 Example usage using [`fuzzysort`](https://www.npmjs.com/package/fuzzysort):
 ```ts
@@ -853,15 +886,19 @@ Adds a listener for when the emitter errors. This method returns the emitter obj
 
 ### `MagicEmitter.on(event: "done", listener: () => any): MagicEmitter;`
 
-Adds a listener for when the emitter is done: either after finishing, erroring, or being cancelled. This method returns the emitter object.
+Adds a listener for when the emitter finishes its current run. Cancel still emits `done`. Some errors emit `error` and stop without `done`. This method returns the emitter object.
 
-### `MagicEmitter.cancel(): void;`
+### `MagicEmitter.cancel(): MagicEmitter;`
 
-Cancels emitting data. Only emits the `"cancel"` event, not the `"end"` event.
+Cancels emitting data. Only emits the `"cancel"` event, not the `"end"` event. Returns the emitter.
+
+### `MagicEmitter.cancelAfterPage(): MagicEmitter;`
+
+Stops after the current page instead of requesting the next one. Returns the emitter.
 
 ### `MagicEmitter.waitForAll(): Promise<T[] & { not_found: NOT_FOUND[] }>;`
 
-Returns a promise for an array of `T`, fulfilled after the end event is emitted. If the API returns that it was unable to find anything, it's returned in a `not_found` array property on the array of `T`. (Note that this property is excluded when using `JSON.stringify` on the array)
+Returns a promise for an array of `T`, fulfilled when the emitter emits `done`. It rejects if `error` is emitted first. If the API returns that it was unable to find anything, it's returned in a `not_found` array property on the array of `T`. (Note that this property is excluded when using `JSON.stringify` on the array)
 
 ### `MagicEmitter.all(): AsyncGenerator<T, void, unknown>;`
 

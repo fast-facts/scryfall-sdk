@@ -1,11 +1,10 @@
 # scryfall-sdk
 [![npm](https://img.shields.io/npm/v/scryfall-sdk.svg?style=flat-square)](https://www.npmjs.com/package/scryfall-sdk)
 [![GitHub issues](https://img.shields.io/github/issues/ChiriVulpes/scryfall-sdk.svg?style=flat-square)](https://github.com/ChiriVulpes/scryfall-sdk)
-[![Travis](https://img.shields.io/travis/com/ChiriVulpes/scryfall-sdk/master.svg?style=flat-square)](https://travis-ci.com/ChiriVulpes/scryfall-sdk)
 
 A Node.js SDK for [Scryfall](https://scryfall.com/docs/api) written in Typescript.
 
-As of [August 8th, 2024](./CHANGELOG.md), all features described in the [Scryfall documentation](https://scryfall.com/docs/api) should be supported. If you see something that isn't, make an issue!
+Covers the card, set, ruling, symbology, catalog, bulk data, and migration endpoints in the [Scryfall documentation](https://scryfall.com/docs/api). If something is missing, make an issue!
 
 
 ## Installation

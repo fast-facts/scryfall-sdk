@@ -54,7 +54,7 @@ export function clearCache() {
 }
 
 /**
- * Sets the duration that most API calls will be cached. By default, the cache duration is 1 day.
+ * Sets the duration that most API calls will be cached. By default, the cache duration is 1 hour.
  * To disable caching entirely, set the timeout to `0`
  */
 export function setCacheDuration(ms: number) {
