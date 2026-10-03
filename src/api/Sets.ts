@@ -1,5 +1,5 @@
 import { IScry, SYMBOL_CARDS, SYMBOL_SET } from '../IScry';
-import Cached from '../util/Cached';
+import { Cached } from '../util/Cached';
 import MagicQuerier, { List, TOrArrayOfT } from '../util/MagicQuerier';
 import cards, { Card, SearchOptions } from './Cards';
 
@@ -54,18 +54,31 @@ export class Set {
   icon_svg_uri: string;
   search_uri: string;
 
+  /**
+   * Turns plain set data into a Set.
+   * @param set The set data to use.
+   */
   public static construct(set: Set) {
     Object.setPrototypeOf(set, Set.prototype);
     return set;
   }
 
   private [SYMBOL_CARDS]?: Card[];
+  /**
+   * Returns the cards in this set.
+   * @param options Extra search options. When left out, the cards are saved and reused.
+   */
   public async getCards(options?: SetSearchOptions) {
     if (!options)
       return this[SYMBOL_CARDS] ??= await this.search(`s:${this.code}`, { order: 'set' });
     return this.search(`s:${this.code}`, { order: 'set', ...options });
   }
 
+  /**
+   * Returns cards in this set that match the search text.
+   * @param query Search text added after this set's code.
+   * @param options Extra search options.
+   */
   public search(query: string, options?: SetSearchOptions) {
     return cards.search(`s:${this.code} ${query}`, options)
       .map(card => {
@@ -83,22 +96,35 @@ class Sets extends MagicQuerier {
       .map(Set.construct);
   }
 
+  /**
+   * Returns the set with the given code.
+   * @param code The set code to look up.
+   */
   @Cached
   public async byCode(code: string) {
     return this.querySet(['sets', code]);
   }
 
+  /**
+   * Returns the set with the given id.
+   * @param id The id of the set.
+   */
   @Cached
   public async byId(id: string) {
     return this.querySet(['sets', id]);
   }
 
+  /**
+   * Returns the set with the given TCGplayer id.
+   * @param id The TCGplayer id of the set.
+   */
   @Cached
   public async byTcgPlayerId(id: number) {
     return this.querySet(['sets/tcgplayer', id]);
   }
 
   /**
+   * @param name The name of the set to look up.
    * @param fuzzy This parameter only works if you've previously set a fuzzy comparer with `Scry.setFuzzySearch`. Otherwise it only returns exact matches.
    */
   @Cached
@@ -127,5 +153,4 @@ class Sets extends MagicQuerier {
   }
 }
 
-const sets = new Sets();
-export default sets;
+export default new Sets();

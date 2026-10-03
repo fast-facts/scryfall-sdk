@@ -1,4 +1,4 @@
-import Cached from '../util/Cached';
+import { Cached } from '../util/Cached';
 import MagicQuerier, { List } from '../util/MagicQuerier';
 
 export type BulkDataType = 'oracle_cards' | 'unique_artwork' | 'default_cards' | 'all_cards' | 'rulings';
@@ -19,6 +19,7 @@ export interface BulkDataDefinition {
 class BulkData extends MagicQuerier {
   /**
    * Returns a stream for the given bulk data if it has been updated since the last download time. If it hasn't, returns `undefined`
+   * @param type The bulk data type to download.
    * @param lastDownload The last time this bulk data was downloaded. If you want to re-download the data regardless of
    * the last time it was downloaded, set this to `0`.
    */
@@ -28,6 +29,7 @@ class BulkData extends MagicQuerier {
 
   /**
    * Returns a stream for the given bulk data if it has been updated since the last download time. If it hasn't, returns `undefined`
+   * @param id The id of the bulk data to download.
    * @param lastDownload The last time this bulk data was downloaded. If you want to re-download the data regardless of
    * the last time it was downloaded, set this to `0`.
    */
@@ -44,11 +46,19 @@ class BulkData extends MagicQuerier {
     return (await this.query<List<BulkDataDefinition>>('bulk-data')).data;
   }
 
+  /**
+   * Returns the definition for one bulk data type.
+   * @param type The bulk data type to look up.
+   */
   @Cached
   public async definitionByType(type: BulkDataType) {
     return this.definition(type);
   }
 
+  /**
+   * Returns the definition for one bulk data id.
+   * @param id The id of the bulk data to look up.
+   */
   @Cached
   public async definitionById(id: string) {
     return this.definition(id);

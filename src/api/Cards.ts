@@ -1,7 +1,8 @@
 import { Color, ColorOrColorless, RESOURCE_GENERIC_CARD_BACK, SYMBOL_COST, SYMBOL_PRINTS, SYMBOL_RULINGS, SYMBOL_SET, SYMBOL_TEXT } from '../IScry';
-import Cached from '../util/Cached';
+import { Cached } from '../util/Cached';
 import MagicEmitter from '../util/MagicEmitter';
 import MagicQuerier, { ApiCatalog, List, TOrArrayOfT } from '../util/MagicQuerier';
+import cards from './Cards';
 import Rulings, { Ruling } from './Rulings';
 import Sets, { Set } from './Sets';
 
@@ -40,9 +41,6 @@ export interface SearchOptions {
   include_extras?: boolean;
   include_multilingual?: boolean;
   include_variations?: boolean;
-  /**
-   * The page to start on. Defaults to `1`, for first page. A page is 175 cards.
-   */
   page?: number;
 }
 
@@ -204,6 +202,10 @@ export class RelatedCard {
   type_line: string;
   uri: string;
 
+  /**
+   * Turns plain related-card data into a RelatedCard.
+   * @param card The related-card data to use.
+   */
   public static construct(card: RelatedCard) {
     Object.setPrototypeOf(card, RelatedCard.prototype);
     return card;
@@ -218,6 +220,10 @@ export class RelatedCard {
 interface CardFaceMethods {
   getText (): string | null | undefined;
   getCost (): string | null | undefined;
+  /**
+   * Returns the image link for this face at the given size.
+   * @param version The image size to return.
+   */
   getImageURI (version: keyof ImageUris): string | null | undefined;
 }
 
@@ -383,41 +389,65 @@ export interface CardIdentifier {
 }
 
 export const CardIdentifier = {
+  /**
+   * Builds a card identifier from a Scryfall id.
+   * @param id The Scryfall id of the card.
+   */
   byId(id: string): CardIdentifier {
     return { id };
   },
 
+  /**
+   * Builds a card identifier from a Magic Online id.
+   * @param id The Magic Online id of the card.
+   */
   byMtgoId(id: number): CardIdentifier {
     return { mtgo_id: id };
   },
 
+  /**
+   * Builds a card identifier from a Multiverse id.
+   * @param id The Multiverse id of the card.
+   */
   byMultiverseId(id: number): CardIdentifier {
     return { multiverse_id: id };
   },
 
+  /**
+   * Builds a card identifier from an Oracle id.
+   * @param id The Oracle id of the card.
+   */
   byOracleId(id: string): CardIdentifier {
     return { oracle_id: id };
   },
 
+  /**
+   * Builds a card identifier from an illustration id.
+   * @param id The illustration id of the card.
+   */
   byIllustrationId(id: string): CardIdentifier {
     return { illustration_id: id };
   },
 
+  /**
+   * Builds a card identifier from a name, and an optional set.
+   * @param name The name of the card.
+   * @param set The set code, if you want one printing.
+   */
   byName(name: string, set?: string): CardIdentifier {
     return { name, set };
   },
 
+  /**
+   * Builds a card identifier from a set and collector number.
+   * @param set The set code of the card.
+   * @param collectorNumber The collector number of the card.
+   */
   bySet(set: string, collectorNumber: string | number): CardIdentifier {
     return { collector_number: `${collectorNumber}`, set };
   },
 };
 
-/**
- * A transformer that replaces symbols as seen in `mana_cost` and `oracle_text` in the format: `{G}`, `{8}`, `{U/W}`, etc.
- *
- * A transformer will be given a type, and a potential second type (in the case of `{T/T}`),
- * and produce a string to replace the symbol in the text.
- */
 export type SymbologyTransformer = (type: string, type2?: string) => string;
 let symbologyTransformer: SymbologyTransformer | string | undefined;
 const REGEX_SYMBOLOGY = /{([a-z]|\d+)(?:\/([a-z]))?}/gi;
@@ -516,10 +546,6 @@ export class Card implements CardFaceMethods {
   printed_text?: string | null;
   printed_type_line?: string | null;
   promo: boolean;
-  /**
-   * Note: This may return other values, I can't check if the possible strings have changed because the Scryfall docs
-   * no longer list the possible promo types.
-   */
   promo_types?: (keyof typeof PromoType)[] | null;
   purchase_uris?: PurchaseUris | null;
   rarity: keyof typeof Rarity;
@@ -541,6 +567,10 @@ export class Card implements CardFaceMethods {
   watermark?: string | null;
   preview?: Preview | null;
 
+  /**
+   * Turns plain card data into a Card.
+   * @param card The card data to use.
+   */
   public static construct(card: Card) {
     Object.setPrototypeOf(card, Card.prototype);
 
@@ -588,6 +618,7 @@ export class Card implements CardFaceMethods {
   }
 
   /**
+   * @param format The format to check.
    * @returns `true` if this card is `legal` or `restricted` in the given format.
    */
   public isLegal(format: keyof typeof Format) {
@@ -595,6 +626,7 @@ export class Card implements CardFaceMethods {
   }
 
   /**
+   * @param format The format to check.
    * @returns `true` if this card is `not_legal` or `banned` in the given format.
    */
   public isIllegal(format: keyof typeof Format) {
@@ -623,16 +655,28 @@ export class Card implements CardFaceMethods {
     return transform(this, 'mana_cost', this[SYMBOL_COST]);
   }
 
+  /**
+   * Returns the image link for this card at the given size.
+   * @param version The image size to return.
+   */
   public getImageURI(version: keyof ImageUris) {
     return this.image_uris?.[version] ??
       this.card_faces[0].image_uris?.[version];
   }
 
+  /**
+   * Returns the front-face image link at the given size.
+   * @param version The image size to return.
+   */
   public getFrontImageURI(version: keyof ImageUris) {
     return this.card_faces[0].image_uris?.[version] ??
       this.image_uris?.[version];
   }
 
+  /**
+   * Returns the back-face image link at the given size.
+   * @param version The image size to return.
+   */
   public getBackImageURI(version: keyof ImageUris) {
     return this.layout !== 'transform' && this.layout !== 'double_faced_token'
       ? RESOURCE_GENERIC_CARD_BACK
@@ -641,12 +685,27 @@ export class Card implements CardFaceMethods {
 }
 
 class Cards extends MagicQuerier {
+  /**
+   * Sets how mana symbols in card text are replaced.
+   * @param transformer Text or a function used to replace each symbol. Leave it out to stop replacing symbols.
+   */
   public setSymbologyTransformer(transformer?: string | SymbologyTransformer) {
     symbologyTransformer = transformer;
     return this;
   }
 
+  /**
+   * Returns the card with the given name.
+   * @param name The card name to look up.
+   * @param fuzzy When `true`, allows a close name match instead of an exact one.
+   */
   public async byName(name: string, fuzzy?: boolean): Promise<Card>;
+  /**
+   * Returns the card with the given name.
+   * @param name The card name to look up.
+   * @param set A set code, if you want one printing.
+   * @param fuzzy When `true`, allows a close name match instead of an exact one.
+   */
   public async byName(name: string, set?: string, fuzzy?: boolean): Promise<Card>;
   @Cached
   public async byName(name: string, set?: string | boolean, fuzzy = false) {
@@ -663,11 +722,21 @@ class Cards extends MagicQuerier {
     return promise;
   }
 
+  /**
+   * Returns the card with the given Scryfall id.
+   * @param id The Scryfall id of the card.
+   */
   @Cached
   public async byId(id: string) {
     return this.queryCard(['cards', id]);
   }
 
+  /**
+   * Returns the card from the given set and collector number.
+   * @param setCode The set code, or the set itself.
+   * @param collectorNumber The collector number of the card.
+   * @param lang A language code, if you want that printing.
+   */
   @Cached
   public async bySet(setCode: string | Set, collectorNumber: string | number, lang?: string) {
     const path = ['cards', typeof setCode === 'string' ? setCode : setCode.code, collectorNumber];
@@ -675,45 +744,75 @@ class Cards extends MagicQuerier {
     return this.queryCard(path);
   }
 
+  /**
+   * Returns the card with the given Multiverse id.
+   * @param id The Multiverse id of the card.
+   */
   @Cached
   public async byMultiverseId(id: number) {
     return this.queryCard(['cards/multiverse', id]);
   }
 
+  /**
+   * Returns the card with the given Magic Online id.
+   * @param id The Magic Online id of the card.
+   */
   @Cached
   public async byMtgoId(id: number) {
     return this.queryCard(['cards/mtgo', id]);
   }
 
+  /**
+   * Returns the card with the given Arena id.
+   * @param id The Arena id of the card.
+   */
   @Cached
   public async byArenaId(id: number) {
     return this.queryCard(['cards/arena', id]);
   }
 
+  /**
+   * Returns the card with the given TCGplayer id.
+   * @param id The TCGplayer id of the card.
+   */
   @Cached
   public async byTcgPlayerId(id: number) {
     return this.queryCard(['cards/tcgplayer', id]);
   }
 
+  /**
+   * Returns the card with the given Cardmarket id.
+   * @param id The Cardmarket id of the card.
+   */
   @Cached
   public async byCardmarketId(id: number) {
     return this.queryCard(['cards/cardmarket', id]);
   }
 
+  /**
+   * Returns a random card, or a random card that matches the search.
+   * @param query The search text to match. Leave it out for any card.
+   */
   public async random(query?: string) {
     return this.queryCard('cards/random', { q: query });
   }
 
   /**
    * Returns a MagicEmitter of every card in the Scryfall database that matches the given query.
+   * @param query The search text to match.
+   * @param options Search options for this search.
    */
   public search(query: string, options?: SearchOptions): MagicEmitter<Card>;
   /**
    * Returns a MagicEmitter of every card in the Scryfall database that matches the given query.
+   * @param query The search text to match.
+   * @param page The page to start on.
    */
   public search(query: string, page?: number): MagicEmitter<Card>;
   /**
    * Returns a MagicEmitter of every card in the Scryfall database that matches the given query.
+   * @param query The search text to match.
+   * @param options Search options, or a page number.
    */
   public search(query: string, options?: SearchOptions | number): MagicEmitter<Card>;
   public search(query: string, options?: SearchOptions | number) {
@@ -726,11 +825,19 @@ class Cards extends MagicQuerier {
     return emitter;
   }
 
+  /**
+   * Returns card names that start with the given text.
+   * @param name The start of a card name.
+   */
   @Cached
   public async autoCompleteName(name: string) {
     return (await this.query<ApiCatalog>('cards/autocomplete', { q: name })).data;
   }
 
+  /**
+   * Returns the cards for the given identifiers.
+   * @param identifiers The card identifiers to look up.
+   */
   public collection(...identifiers: CardIdentifier[]) {
     const emitter = new MagicEmitter<Card, CardIdentifier>()
       .map(Card.construct);
@@ -773,5 +880,4 @@ class Cards extends MagicQuerier {
   }
 }
 
-const cards = new Cards();
-export default cards;
+export default new Cards();

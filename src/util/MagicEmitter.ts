@@ -28,6 +28,11 @@ export default class MagicEmitter<T, NOT_FOUND = never> extends EventEmitter {
     this.on('cancel', () => { this._ended = true; });
   }
 
+  /**
+   * Adds a function that runs when an event happens.
+   * @param event The name of the event.
+   * @param listener The function to call.
+   */
   public on(event: 'data', listener: (data: T) => any): this;
   public on(event: 'not_found', listener: (data: NOT_FOUND) => any): this;
   public on(event: 'end', listener: (...args: any[]) => any): this;
@@ -39,6 +44,11 @@ export default class MagicEmitter<T, NOT_FOUND = never> extends EventEmitter {
     return this;
   }
 
+  /**
+   * Sends an event to every listening function.
+   * @param event The name of the event.
+   * @param data The value sent with the event.
+   */
   public emit(event: 'data', data: T): boolean;
   public emit(event: 'not_found', data: NOT_FOUND): boolean;
   public emit(event: 'end'): boolean;
@@ -51,6 +61,11 @@ export default class MagicEmitter<T, NOT_FOUND = never> extends EventEmitter {
     return super.emit(event, ...data);
   }
 
+  /**
+   * Sends the same event once for each value.
+   * @param event The name of the event.
+   * @param data The values to send.
+   */
   public emitAll(event: 'data', ...data: T[]): void;
   public emitAll(event: 'not_found', ...data: NOT_FOUND[]): void;
   public emitAll(event: string, ...data: any[]) {
@@ -94,6 +109,10 @@ export default class MagicEmitter<T, NOT_FOUND = never> extends EventEmitter {
     return this.generate('not_found');
   }
 
+  /**
+   * Changes each value before it is sent out.
+   * @param mapper The function that changes one value.
+   */
   public map<T2>(mapper: (value: T) => T2) {
     this.mappers.push(mapper);
     return this as any as MagicEmitter<T2, NOT_FOUND>;

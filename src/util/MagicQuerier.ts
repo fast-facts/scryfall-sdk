@@ -5,8 +5,6 @@ import MagicEmitter from './MagicEmitter';
 export const defaultRequestTimeout = 100;
 export const minimumRequestTimeout = 50;
 
-let lastQuery = 0;
-
 function sleep(ms = 0) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -109,8 +107,8 @@ export default class MagicQuerier {
   }
 
   private async tryQuery(apiPath: string, query?: Record<string, any>, post?: any) {
-    const wait = Math.max(0, lastQuery + MagicQuerier.timeout - Date.now());
-    lastQuery = Date.now() + wait;
+    const wait = Math.max(0, MagicQuerier.lastQuery + MagicQuerier.timeout - Date.now());
+    MagicQuerier.lastQuery = Date.now() + wait;
     if (wait)
       await sleep(wait);
 

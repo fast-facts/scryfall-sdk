@@ -8,25 +8,22 @@ interface ICache {
   parent?: ICache;
 }
 
-// 10 seconds minimum cache time (configuring it lower disables caching)
-const MIN_CACHE_DURATION = 1000 * 10;
 // 1 hour default cache time
 const DEFAULT_CACHE_DURATION = 1000 * 60 * 60;
 let configuredCacheDuration = DEFAULT_CACHE_DURATION;
 
-const MIN_CACHE_LIMIT = 1;
 const DEFAULT_CACHE_LIMIT = 500;
 let configuredCacheLimit = DEFAULT_CACHE_LIMIT;
 
 let caches: ICache[] = [];
 
-function Cached(target: any, key: string, descriptor: TypedPropertyDescriptor<AnyFunction>) {
+export function Cached(target: any, key: string, descriptor: TypedPropertyDescriptor<AnyFunction>) {
   const topCache: ICache = { map: new Map(), time: 0 };
   return {
     value(...args: any[]) {
       let cache: ICache = topCache;
       let shouldCache = false;
-      if (configuredCacheDuration >= MIN_CACHE_DURATION && configuredCacheLimit >= MIN_CACHE_LIMIT) {
+      if (cachingEnabled()) {
         // only put together caches when caches are enabled
         const now = Date.now();
 
@@ -45,6 +42,10 @@ function Cached(target: any, key: string, descriptor: TypedPropertyDescriptor<An
         if (now - cache.time < configuredCacheDuration)
           return cache.value;
 
+        const index = caches.indexOf(cache);
+        if (index !== -1)
+          caches.splice(index, 1);
+
         cache.time = now;
         shouldCache = true;
       }
@@ -55,7 +56,7 @@ function Cached(target: any, key: string, descriptor: TypedPropertyDescriptor<An
         caches.push(cache);
         while (caches.length > configuredCacheLimit)
           deleteCacheValue(caches.shift()!);
-        handleCacheGarbageCollection(false);
+        scheduleExpiry();
       }
 
       return result;
@@ -69,48 +70,37 @@ function deleteCacheValue(cache: ICache) {
     cache.parent?.map.delete(cache.key);
 }
 
-let garbageCollectionTimer: NodeJS.Timeout | undefined;
-function handleCacheGarbageCollection(reset: boolean) {
-  if (!reset && garbageCollectionTimer !== undefined)
-    // garbage collection already running, no need to start it up again
+let expiryTimer: ReturnType<typeof setTimeout> | undefined;
+
+function cachingEnabled() {
+  return configuredCacheDuration > 0 && configuredCacheLimit > 0;
+}
+
+function stopExpiry() {
+  if (expiryTimer === undefined)
     return;
+  clearTimeout(expiryTimer);
+  expiryTimer = undefined;
+}
 
-  if (garbageCollectionTimer !== undefined && reset)
-    clearInterval(garbageCollectionTimer);
-
-  if (configuredCacheDuration < MIN_CACHE_DURATION || configuredCacheLimit < MIN_CACHE_LIMIT) {
-    // caching is disabled
-    // if there's anything still cached, uncache it
+function scheduleExpiry() {
+  stopExpiry();
+  if (!cachingEnabled()) {
     caches.forEach(deleteCacheValue);
     caches = [];
     return;
   }
+  if (caches.length === 0)
+    return;
 
-  garbageCollectionTimer = setInterval(() => {
+  const delay = Math.max(0, caches[0].time + configuredCacheDuration - Date.now());
+  expiryTimer = setTimeout(() => {
+    expiryTimer = undefined;
     const now = Date.now();
-    let newCaches: ICache[] = caches;
-    for (let i = 0; i < caches.length; i++) {
-      const cache = caches[i];
-      if (now - cache.time > configuredCacheDuration) {
-        deleteCacheValue(cache);
-        newCaches = [];
-      } else {
-        // the cache array is ordered, so if we encounter a cache that shouldn't be deleted, it means the rest of them
-        // should be preserved, so a slice is enough
-        // we don't even need to bother slicing the cache array if this the very first cache
-        if (i)
-          newCaches = caches.slice(i);
-        break;
-      }
-    }
-
-    caches = newCaches;
-
-    if (caches.length === 0 && garbageCollectionTimer !== undefined) {
-      clearInterval(garbageCollectionTimer);
-      garbageCollectionTimer = undefined;
-    }
-  }, Math.sqrt(configuredCacheDuration / 1000) * 2000);
+    while (caches.length > 0 && now - caches[0].time >= configuredCacheDuration)
+      deleteCacheValue(caches.shift()!);
+    scheduleExpiry();
+  }, delay);
 }
 
 function getObjectsCount() {
@@ -118,10 +108,11 @@ function getObjectsCount() {
 }
 
 function isGarbageCollectorRunning() {
-  return garbageCollectionTimer !== undefined;
+  return expiryTimer !== undefined;
 }
 
 function clear() {
+  stopExpiry();
   caches.forEach(deleteCacheValue);
   caches = [];
 }
@@ -129,7 +120,7 @@ function clear() {
 function setDuration(ms: number) {
   if (configuredCacheDuration !== ms) {
     configuredCacheDuration = ms;
-    handleCacheGarbageCollection(true);
+    scheduleExpiry();
   }
 }
 
@@ -141,14 +132,14 @@ function setLimit(count: number) {
   configuredCacheLimit = count;
   while (caches.length > configuredCacheLimit)
     deleteCacheValue(caches.shift()!);
-  handleCacheGarbageCollection(true);
+  scheduleExpiry();
 }
 
 function resetLimit() {
   setLimit(DEFAULT_CACHE_LIMIT);
 }
 
-export default Object.assign(Cached, {
+export const cache = {
   getObjectsCount,
   isGarbageCollectorRunning,
   clear,
@@ -156,4 +147,4 @@ export default Object.assign(Cached, {
   setDuration,
   resetLimit,
   setLimit,
-});
+};

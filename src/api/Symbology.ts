@@ -1,5 +1,5 @@
 import { Color } from '../IScry';
-import Cached from '../util/Cached';
+import { Cached } from '../util/Cached';
 import MagicQuerier, { List } from '../util/MagicQuerier';
 
 export interface CardSymbol {
@@ -37,6 +37,10 @@ class Symbology extends MagicQuerier {
     return (await this.query<List<CardSymbol>>('symbology')).data;
   }
 
+  /**
+   * Turns a short mana cost into its parts.
+   * @param shorthand The mana cost text to read, such as `{2}{G}`.
+   */
   @Cached
   public async parseMana(shorthand: string) {
     return this.query<ManaCost>('symbology/parse-mana', { cost: shorthand });

@@ -1,5 +1,5 @@
 import { IScry } from './IScry';
-import Cached from './util/Cached';
+import { cache } from './util/Cached';
 import MagicQuerier, { minimumRequestTimeout, SearchError } from './util/MagicQuerier';
 
 export * from './api/BulkData';
@@ -20,6 +20,8 @@ export * from './IScry';
 
 /**
  * Sets the name and version of this agent. This is required for all non-browser applications.
+ * @param agent The name of this agent.
+ * @param version The version of this agent.
  */
 export function setAgent(agent: string, version: string) {
   MagicQuerier.agent = `${agent}/${version}`;
@@ -29,6 +31,7 @@ export function setAgent(agent: string, version: string) {
  * Sets the API calls to retry if they fail, for any reason.
  * @param attempts The number of attempts that can be made (includes the initial call).
  * @param timeout The time that the query should wait before attempting the request again.
+ * @param canRetry The check for whether a failed call should be tried again.
  */
 export function setRetry(attempts: number, timeout?: number, canRetry?: (error: SearchError) => boolean) {
   MagicQuerier.retry = { attempts, timeout, canRetry };
@@ -36,6 +39,7 @@ export function setRetry(attempts: number, timeout?: number, canRetry?: (error: 
 
 /**
  * Sets the API calls to be spaced by at least this amount of time. Respects the minimum requested timeout provided by Scryfall.
+ * @param timeout The minimum time between calls, in milliseconds.
  */
 export function setTimeout(timeout: number) {
   MagicQuerier.timeout = Math.max(minimumRequestTimeout, timeout);
@@ -45,25 +49,31 @@ export function setTimeout(timeout: number) {
  * Clears the cache
  */
 export function clearCache() {
-  Cached.clear();
+  cache.clear();
 }
 
 /**
  * Sets the duration that most API calls will be cached. By default, the cache duration is 1 hour.
  * To disable caching entirely, set the timeout to `0`
+ * @param ms The time to keep a result, in milliseconds.
  */
 export function setCacheDuration(ms: number) {
-  Cached.setDuration(ms);
+  cache.setDuration(ms);
 }
 
 /**
  * Sets the maximum number of query results that can be cached at one time. By default, the maximum is 500 objects.
  * To disable caching entirely, set the amount to `0`
+ * @param amount The maximum number of saved results.
  */
 export function setCacheLimit(amount: number) {
-  Cached.setLimit(amount);
+  cache.setLimit(amount);
 }
 
+/**
+ * Sets the function used to find a close name match.
+ * @param search The function that picks a close match.
+ */
 export function setFuzzySearch(search?: typeof IScry['fuzzySearch']) {
   IScry.fuzzySearch = search;
 }

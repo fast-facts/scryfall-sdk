@@ -1,4 +1,4 @@
-import Cached from '../util/Cached';
+import { Cached } from '../util/Cached';
 import MagicQuerier, { ApiCatalog } from '../util/MagicQuerier';
 
 class Catalog extends MagicQuerier {

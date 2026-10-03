@@ -813,8 +813,7 @@ Many, but not all query functions cache their results. For example, trying to ge
 
 #### Notes:
 - By default, scryfall-sdk-updated uses a cache duration of 1 hour.
-- The minimum supported cache time is 10 seconds. Putting a value lower than this disables caching entirely.
-- **A cached value expiring does not immediately remove it.** If your application needs to conserve memory, lower the cache limit with `setCacheLimit`. If cached results are keeping your application open, use `Scry.clearCache()`
+- Set the duration or the limit to `0` to turn caching off.
 
 #### `setCacheDuration (ms: number): void;` [🡅](#table-of-contents)
 

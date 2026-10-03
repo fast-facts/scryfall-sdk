@@ -3,7 +3,7 @@ type NodeEventEmitter = import('node:events');
 type Listener = (...args: any[]) => void;
 const EMPTY: Listener[] = [];
 
-class EventEmitter implements NodeEventEmitter {
+export default class EventEmitter implements NodeEventEmitter {
   private _maxListeners = 10;
   private readonly _listeners: Record<string | symbol, Listener[]> = {};
 
@@ -105,5 +105,3 @@ class EventEmitter implements NodeEventEmitter {
     return Object.keys(this._listeners);
   }
 }
-
-export default EventEmitter;
