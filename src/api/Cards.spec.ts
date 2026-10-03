@@ -148,6 +148,26 @@ describe('Cards', () => {
     expect(cardNames).toContain('Blood Scrivener');
   });
 
+  it('autocomplete name with extras', async () => {
+    const cardNames = await Scry.Cards.autoCompleteName('treasure', true);
+    expect(cardNames.length).toBeGreaterThan(0);
+  });
+
+  it('sorts by penny and review', async () => {
+    const penny = await Scry.Cards.search('t:creature', { order: 'penny' }).cancelAfterPage().waitForAll();
+    expect(penny.length).toBeGreaterThan(0);
+    const review = await Scry.Cards.search('t:creature', { order: 'review' }).cancelAfterPage().waitForAll();
+    expect(review.length).toBeGreaterThan(0);
+  });
+
+  it('manifest', async () => {
+    const page = await Scry.Cards.manifest().cancelAfterPage().waitForAll();
+    expect(page.length).toBeGreaterThan(0);
+    expect(page[0].id.length).toBeGreaterThan(0);
+    expect(page[0].name.length).toBeGreaterThan(0);
+    expect(page[0].set_code.length).toBeGreaterThan(0);
+  });
+
   it('should allow cancelling after a single page of results', async () => {
     const result = await Scry.Cards.search('cmc>0').cancelAfterPage().waitForAll();
     expect(result).toHaveLength(175);

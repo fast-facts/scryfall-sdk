@@ -26,6 +26,8 @@ export enum Sort {
   toughness,
   edhrec,
   artist,
+  penny,
+  review,
 }
 
 export enum SortDirection {
@@ -42,6 +44,24 @@ export interface SearchOptions {
   include_multilingual?: boolean;
   include_variations?: boolean;
   page?: number;
+}
+
+export interface ManifestOptions {
+  lang?: string;
+  order?: 'released' | 'imageupdated';
+  page?: number;
+}
+
+export interface ManifestEntry {
+  id: string;
+  oracle_id: string | null;
+  name: string;
+  set_code: string;
+  collector_number: string;
+  lang: string;
+  created_at: string;
+  data_updated_at: string;
+  image_updated_at: string | null;
 }
 
 export enum Rarity {
@@ -826,12 +846,29 @@ class Cards extends MagicQuerier {
   }
 
   /**
+   * Returns a short record for every card, for keeping a local copy in sync.
+   * @param options Language, sort, and page. Leave it out to start at the first page.
+   */
+  public manifest(options?: ManifestOptions) {
+    const emitter = new MagicEmitter<ManifestEntry>();
+
+    this.queryPage(emitter, 'cards/manifest', options)
+      .catch((err: Error) => emitter.emit('error', err));
+
+    return emitter;
+  }
+
+  /**
    * Returns card names that start with the given text.
    * @param name The start of a card name.
+   * @param includeExtras When `true`, also returns extra and token names.
    */
   @Cached
-  public async autoCompleteName(name: string) {
-    return (await this.query<ApiCatalog>('cards/autocomplete', { q: name })).data;
+  public async autoCompleteName(name: string, includeExtras?: boolean) {
+    return (await this.query<ApiCatalog>('cards/autocomplete', {
+      q: name,
+      include_extras: includeExtras ? true : undefined,
+    })).data;
   }
 
   /**

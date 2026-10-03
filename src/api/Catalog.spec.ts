@@ -85,4 +85,19 @@ describe('Catalog', () => {
     const result = await Scry.Catalog.supertypes();
     expect(result.length).toBeGreaterThanOrEqual(7);
   });
+
+  it('battle types', async () => {
+    const result = await Scry.Catalog.battleTypes();
+    expect(result).toContain('Siege');
+  });
+
+  it('flavor words', async () => {
+    const result = await Scry.Catalog.flavorWords();
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('card types', async () => {
+    const result = await Scry.Catalog.cardTypes();
+    expect(result).toContain('Creature');
+  });
 });

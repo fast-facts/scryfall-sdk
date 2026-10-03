@@ -26,6 +26,13 @@ describe('Bulk Data', () => {
       expect(result.type).toBe('all_cards');
       expect(result.compressed_size).toBeGreaterThanOrEqual(10000);
     });
+
+    it('tag files by type', async () => {
+      const art = await Scry.BulkData.definitionByType('art_tags');
+      expect(art.type).toBe('art_tags');
+      const oracle = await Scry.BulkData.definitionByType('oracle_tags');
+      expect(oracle.type).toBe('oracle_tags');
+    });
   });
 
   describe('download', () => {

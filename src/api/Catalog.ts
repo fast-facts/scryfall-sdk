@@ -86,6 +86,21 @@ class Catalog extends MagicQuerier {
   public async supertypes() {
     return (await this.query<ApiCatalog>('catalog/supertypes')).data;
   }
+
+  @Cached
+  public async battleTypes() {
+    return (await this.query<ApiCatalog>('catalog/battle-types')).data;
+  }
+
+  @Cached
+  public async flavorWords() {
+    return (await this.query<ApiCatalog>('catalog/flavor-words')).data;
+  }
+
+  @Cached
+  public async cardTypes() {
+    return (await this.query<ApiCatalog>('catalog/card-types')).data;
+  }
 }
 
 export default new Catalog();

@@ -1,7 +1,7 @@
 import { Cached } from '../util/Cached';
 import MagicQuerier, { List } from '../util/MagicQuerier';
 
-export type BulkDataType = 'oracle_cards' | 'unique_artwork' | 'default_cards' | 'all_cards' | 'rulings';
+export type BulkDataType = 'oracle_cards' | 'unique_artwork' | 'default_cards' | 'all_cards' | 'rulings' | 'art_tags' | 'oracle_tags';
 
 export interface BulkDataDefinition {
   object: 'bulk_data';

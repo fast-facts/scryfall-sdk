@@ -11,8 +11,9 @@
   - [`Cards.byTcgPlayerId (id: number): Promise<Card>;` ](#cardsbytcgplayerid-id-number-promisecard-)
   - [`Cards.byCardmarketId (id: number): Promise<Card>;` ](#cardsbycardmarketid-id-number-promisecard-)
   - [`Cards.search (query: string, options?: SearchOptions | number): MagicEmitter<Card>;` ](#cardssearch-query-string-options-searchoptions--number-magicemittercard-)
+  - [`Cards.manifest (options?: ManifestOptions): MagicEmitter<ManifestEntry>;` ](#cardsmanifest-options-manifestoptions-magicemittermanifestentry-)
   - [`Cards.random (query?: string): Promise<Card>;` ](#cardsrandom-query-string-promisecard-)
-  - [`Cards.autoCompleteName (name: string): Promise<string[]>;` ](#cardsautocompletename-name-string-promisestring-)
+  - [`Cards.autoCompleteName (name: string, includeExtras?: boolean): Promise<string[]>;` ](#cardsautocompletename-name-string-includeextras-boolean-promisestring-)
   - [`Cards.collection (...collection: CardIdentifier[]): MagicEmitter<Card>;`](#cardscollection-collection-cardidentifier-magicemittercard-)
   - [`Cards.setSymbologyTransformer (transformer?: string | SymbologyTransformer): void`](#cardssetsymbologytransformer-transformer-string--symbologytransformer-void-)
   - [`Card`](#card-)
@@ -63,6 +64,9 @@
   - [`Catalog.keywordActions (): Promise<string[]>;` ](#catalogkeywordactions--promisestring-)
   - [`Catalog.abilityWords (): Promise<string[]>;` ](#catalogabilitywords--promisestring-)
   - [`Catalog.supertypes (): Promise<string[]>;` ](#catalogsupertypes--promisestring-)
+  - [`Catalog.battleTypes (): Promise<string[]>;` ](#catalogbattletypes--promisestring-)
+  - [`Catalog.flavorWords (): Promise<string[]>;` ](#catalogflavorwords--promisestring-)
+  - [`Catalog.cardTypes (): Promise<string[]>;` ](#catalogcardtypes--promisestring-)
 - [Bulk Data](#bulk-data-)
   - [`BulkData.downloadByType (type: BulkDataType, lastDownload: string | number | Date): Promise<ReadableStream | null | undefined>;`](#bulkdatadownloadbytype-type-bulkdatatype-lastdownload-string--number--date-promisereadablestream--null--undefined-)
   - [`BulkData.downloadById (id: string, lastDownload: string | number | Date): Promise<ReadableStream | null | undefined>;`](#bulkdatadownloadbyid-id-string-lastdownload-string--number--date-promisereadablestream--null--undefined-)
@@ -197,7 +201,7 @@ Scry.Cards.search("type:planeswalker")
   });
 ```
 
-For information on how to provide extra options, see the [`/cards/search` page](https://scryfall.com/docs/api/cards/search) on Scryfall. `SearchOptions` in [`Cards.ts`](./src/api/Cards.ts) is the set this SDK accepts. It does not include every sort order Scryfall documents.
+For information on how to provide extra options, see the [`/cards/search` page](https://scryfall.com/docs/api/cards/search) on Scryfall. `SearchOptions` in [`Cards.ts`](./src/api/Cards.ts) is the set this SDK accepts.
 
 This query returns a [`MagicEmitter`](#magicemittert-not_found-).
 
@@ -206,6 +210,15 @@ The page parameter is the page of results that the query will begin at. A page i
 ```ts
 const cardsFromPage7 = await Scry.Cards.search("type:creature", 7).cancelAfterPage().waitForAll();
 console.log(cardsFromPage7.length); // 175
+```
+
+### `Cards.manifest (options?: ManifestOptions): MagicEmitter<ManifestEntry>;` [🡅](#table-of-contents)
+
+Returns a short record for every card. Each page has 15,000 records, and the SDK waits 6 seconds between pages. `order` is `released` or `imageupdated`, newest first. `released` is the default. Leave `lang` out for Scryfall's default mix.
+
+```ts
+const page = await Scry.Cards.manifest().cancelAfterPage().waitForAll();
+console.log(page[0].name);
 ```
 
 ### `Cards.random (query?: string): Promise<Card>;` [🡅](#table-of-contents)
@@ -224,7 +237,7 @@ const card = await Scry.Cards.random("type:planeswalker");
 console.log(card.name); // some random planeswalker card
 ```
 
-### `Cards.autoCompleteName (name: string): Promise<string[]>;` [🡅](#table-of-contents)
+### `Cards.autoCompleteName (name: string, includeExtras?: boolean): Promise<string[]>;` [🡅](#table-of-contents)
 
 From the [Scryfall documentation](https://scryfall.com/docs/api/cards/autocomplete):
 > Returns [an array] containing up to 20 full English card names that could be autocompletions of the given string parameter.
@@ -236,6 +249,8 @@ From the [Scryfall documentation](https://scryfall.com/docs/api/cards/autocomple
 > Spaces, punctuation, and capitalization are ignored.
 > 
 > If the given string parameter is less than 2 characters long, or if no names match, the Catalog will contain 0 items (instead of returning any errors).
+
+Pass `true` to also include extra and token names.
 
 ```ts
 const results = await Scry.Cards.autoCompleteName("bloodsc");
@@ -674,13 +689,34 @@ const supertypes = await Scry.Catalog.supertypes();
 console.log(supertypes.length); // 7
 ```
 
+### `Catalog.battleTypes (): Promise<string[]>;` [🡅](#table-of-contents)
+
+```ts
+const battleTypes = await Scry.Catalog.battleTypes();
+console.log(battleTypes.includes("Siege")); // true
+```
+
+### `Catalog.flavorWords (): Promise<string[]>;` [🡅](#table-of-contents)
+
+```ts
+const flavorWords = await Scry.Catalog.flavorWords();
+console.log(flavorWords.length);
+```
+
+### `Catalog.cardTypes (): Promise<string[]>;` [🡅](#table-of-contents)
+
+```ts
+const cardTypes = await Scry.Catalog.cardTypes();
+console.log(cardTypes.includes("Creature")); // true
+```
+
 
 ## Bulk Data [🡅](#table-of-contents)
 
 ### `BulkData.downloadByType (type: BulkDataType, lastDownload: string | number | Date): Promise<ReadableStream | null | undefined>;` [🡅](#table-of-contents)
 Returns a stream for a bulk data file by its type, or `undefined` if the bulk data file hasn't been updated since the last download time.
 
-`type` is `oracle_cards`, `unique_artwork`, `default_cards`, `all_cards`, or `rulings`.
+`type` is `oracle_cards`, `unique_artwork`, `default_cards`, `all_cards`, `rulings`, `art_tags`, or `oracle_tags`.
 
 ```ts
 /**
@@ -711,11 +747,11 @@ console.log(download); // either a stream or undefined
 ```
 
 ### `BulkData.definitions (): Promise<BulkDataDefinition[]>;` [🡅](#table-of-contents)
-Returns the definitions of all bulk data files that Scryfall is currently providing. That list can include tag files. `BulkDataType` only names `oracle_cards`, `unique_artwork`, `default_cards`, `all_cards`, and `rulings`, so `definitionByType` and `downloadByType` do not accept the tag file names.
+Returns the definitions of all bulk data files that Scryfall is currently providing, including tag files.
 
 ```ts
 const definitions = await Scry.BulkData.definitions();
-console.log(definitions.length); // 5
+console.log(definitions.length);
 ```
 
 ### `BulkData.definitionByType (type: BulkDataType): Promise<BulkDataDefinition>;` [🡅](#table-of-contents)
@@ -798,7 +834,7 @@ Scry.setRetry(3, 1000, error => error.code == "some_code");
 
 Sets the delay between API calls. The default is 100ms. The SDK will not go below 50ms.
 
-Scryfall's own limits are stricter on some routes: 100ms for most endpoints, and 500ms for `/cards/search`, `/cards/named`, `/cards/random`, and `/cards/collection`. Use at least 500ms if you call those routes back to back.
+The SDK waits at least 500ms between calls to `/cards/search`, `/cards/named`, `/cards/random`, and `/cards/collection`, and at least 6 seconds between `/cards/manifest` calls. `setTimeout` cannot make those routes faster.
 
 Example usage:
 ```ts
@@ -920,5 +956,13 @@ Example usage:
 ```ts
 for await (const identifier of Scry.Cards.collection({ id: "00000000-0000-0000-0000-000000000000" }).notFound()) {
     console.log(identifier);
+}
+```
+
+### `MagicEmitter.map(mapper: (value: T) => T2): MagicEmitter<T2, NOT_FOUND>;`
+
+```ts
+for await (const name of Scry.Cards.search("type:creature").map(card => card.name).all()) {
+    console.log(name);
 }
 ```

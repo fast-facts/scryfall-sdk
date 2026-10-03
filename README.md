@@ -41,7 +41,7 @@ console.log(prints.length); // 7
 > ```
 
 ## [Full Documentation](./DOCUMENTATION.md)
-scryfall-sdk-updated supports all features of Scryfall, along with automatically paginating through results, downloading bulk data streams, and more. See the [documentation](./DOCUMENTATION.md) for information on everything you can do.
+scryfall-sdk-updated covers the Scryfall JSON endpoints, and also paginates through results and downloads bulk data streams. It does not wrap text, CSV, or image redirects. See the [documentation](./DOCUMENTATION.md) for information on everything you can do.
 
 Know the endpoint you want, but not sure what it looks like in scryfall-sdk-updated? Well, you're in luck: [Scryfall-SDK Equivalents for Scryfall Routes](./ROUTES.md)
 

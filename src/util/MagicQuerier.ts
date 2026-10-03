@@ -1,9 +1,23 @@
 import { ENDPOINT_API } from '../IScry';
 import MagicEmitter from './MagicEmitter';
 
-// the api requests 50-100 ms between calls, we go on the generous side and never wait less than 100 ms between calls
 export const defaultRequestTimeout = 100;
 export const minimumRequestTimeout = 50;
+
+const routeGap: Record<string, number> = {
+  'cards/search': 500,
+  'cards/named': 500,
+  'cards/random': 500,
+  'cards/collection': 500,
+  'cards/manifest': 6000,
+};
+
+export function requestWait(now: number, lastAny: number, lastRoute: number, timeout: number, routeMin?: number) {
+  const anyWait = Math.max(0, lastAny + timeout - now);
+  if (routeMin === undefined)
+    return anyWait;
+  return Math.max(anyWait, lastRoute + Math.max(timeout, routeMin) - now);
+}
 
 function sleep(ms = 0) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -43,6 +57,7 @@ export interface RetryStrategy {
 
 export default class MagicQuerier {
   public static lastQuery = 0;
+  private static lastRoute = new Map<string, number>();
   public static retry: RetryStrategy = { attempts: 1 };
   public static agent?: string;
   public static timeout = defaultRequestTimeout;
@@ -107,8 +122,13 @@ export default class MagicQuerier {
   }
 
   private async tryQuery(apiPath: string, query?: Record<string, any>, post?: any) {
-    const wait = Math.max(0, MagicQuerier.lastQuery + MagicQuerier.timeout - Date.now());
-    MagicQuerier.lastQuery = Date.now() + wait;
+    const routeMin = routeGap[apiPath];
+    const now = Date.now();
+    const wait = requestWait(now, MagicQuerier.lastQuery, MagicQuerier.lastRoute.get(apiPath) ?? 0, MagicQuerier.timeout, routeMin);
+    const start = now + wait;
+    MagicQuerier.lastQuery = start;
+    if (routeMin !== undefined)
+      MagicQuerier.lastRoute.set(apiPath, start);
     if (wait)
       await sleep(wait);
 

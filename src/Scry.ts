@@ -38,7 +38,7 @@ export function setRetry(attempts: number, timeout?: number, canRetry?: (error: 
 }
 
 /**
- * Sets the API calls to be spaced by at least this amount of time. Respects the minimum requested timeout provided by Scryfall.
+ * Sets the API calls to be spaced by at least this amount of time. Slow routes still wait longer when Scryfall requires it.
  * @param timeout The minimum time between calls, in milliseconds.
  */
 export function setTimeout(timeout: number) {

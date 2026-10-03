@@ -12,7 +12,8 @@
 | [`/cards/cardmarket/:id`](./DOCUMENTATION.md#cardsbycardmarketid-id-number-promisecard-) | Card |
 | [`/cards/random(?q=<search query>)`](./DOCUMENTATION.md#cardsrandom-query-string-promisecard-) | Card |
 | [`/cards/search?q=<search query>`](./DOCUMENTATION.md#cardssearch-query-string-options-searchoptions--number-magicemittercard-) | MagicEmitter\<Card\> |
-| [`/cards/autocomplete?q=<card name>`](./DOCUMENTATION.md#cardsautocompletename-name-string-promisestring-) | string[] |
+| [`/cards/manifest`](./DOCUMENTATION.md#cardsmanifest-options-manifestoptions-magicemittermanifestentry-) | MagicEmitter\<ManifestEntry\> |
+| [`/cards/autocomplete?q=<card name>`](./DOCUMENTATION.md#cardsautocompletename-name-string-includeextras-boolean-promisestring-) | string[] |
 | [`/cards/collection`](./DOCUMENTATION.md#cardscollection-collection-cardidentifier-magicemittercard-) | MagicEmitter\<Card\> |
 | [`/sets`](./DOCUMENTATION.md#setsall--promiseset-) | Set[] |
 | [`/sets/:code`](./DOCUMENTATION.md#setsbycode-code-string-promiseset-) | Set |
@@ -42,6 +43,9 @@
 | [`/catalog/keyword-actions`](./DOCUMENTATION.md#catalogkeywordactions--promisestring-) | string[] |
 | [`/catalog/ability-words`](./DOCUMENTATION.md#catalogabilitywords--promisestring-) | string[] |
 | [`/catalog/supertypes`](./DOCUMENTATION.md#catalogsupertypes--promisestring-) | string[] |
+| [`/catalog/battle-types`](./DOCUMENTATION.md#catalogbattletypes--promisestring-) | string[] |
+| [`/catalog/flavor-words`](./DOCUMENTATION.md#catalogflavorwords--promisestring-) | string[] |
+| [`/catalog/card-types`](./DOCUMENTATION.md#catalogcardtypes--promisestring-) | string[] |
 | [`/bulk-data`](./DOCUMENTATION.md#bulkdatadefinitions--promisebulkdatadefinition-) | BulkDataDefinition[] |
 | [`/bulk-data/:type`](./DOCUMENTATION.md#bulkdatadefinitionbytype-type-bulkdatatype-promisebulkdatadefinition-) | BulkDataDefinition |
 | [`/bulk-data/:id`](./DOCUMENTATION.md#bulkdatadefinitionbyid-id-string-promisebulkdatadefinition-) | BulkDataDefinition |
