@@ -17,7 +17,7 @@ Covers the card, set, ruling, symbology, catalog, bulk data, and migration endpo
 npm install scryfall-sdk-updated
 ```
 
-Needs Node.js 18 or newer.
+Needs Node.js 22 or newer.
 
 
 ## Basic Example Usage

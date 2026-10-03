@@ -18,6 +18,9 @@
 		"scry"
 	],
 	"license": "MIT",
+	"engines": {
+		"node": ">=22"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/fast-facts/scryfall-sdk"

@@ -50,6 +50,12 @@ export default class MagicQuerier {
   public static timeout = defaultRequestTimeout;
   public static requestCount = 0;
 
+  public static agentHeader() {
+    if (!this.agent || 'window' in globalThis)
+      return;
+    return { 'User-Agent': this.agent };
+  }
+
   protected async query<T>(apiPath: TOrArrayOfT<string | number | undefined>, query?: Record<string, any>, post?: any): Promise<T> {
     if (Array.isArray(apiPath))
       apiPath = apiPath.join('/');
@@ -118,19 +124,32 @@ export default class MagicQuerier {
 
     const url = `${ENDPOINT_API}/${apiPath}` + searchParams;
 
-    let result: Response | undefined = await fetch(url, {
-      body: JSON.stringify(post),
-      headers: {
-        'Content-Type': 'application/json',
-        ...!MagicQuerier.agent
-          ? undefined
-          : {
-            'User-Agent': MagicQuerier.agent,
+    let result: Response | undefined;
+    let networkError: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        result = await fetch(url, {
+          body: JSON.stringify(post),
+          headers: {
+            ...post ? { 'Content-Type': 'application/json' } : undefined,
+            ...MagicQuerier.agentHeader(),
+            Accept: '*/*',
           },
-        Accept: '*/*',
-      },
-      method: post ? 'POST' : 'GET',
-    });
+          method: post ? 'POST' : 'GET',
+        });
+        networkError = undefined;
+        break;
+      } catch (error) {
+        networkError = error;
+        if (attempt < 2)
+          await sleep(1000);
+      }
+    }
+    if (networkError) {
+      const lastError = new Error(networkError instanceof Error ? networkError.message : 'Failed to fetch') as SearchError;
+      lastError.code = 'network';
+      return { result: undefined, lastError };
+    }
 
     let lastError: SearchError | undefined;
     if (result !== undefined && !result.ok) {
@@ -144,6 +163,8 @@ export default class MagicQuerier {
   }
 
   private canRetry(error: SearchError) {
+    if (error.code === 'network')
+      return true;
     if (MagicQuerier.retry.canRetry)
       return MagicQuerier.retry.canRetry(error);
     return error.code !== 'not_found' && error.code !== 'bad_request';

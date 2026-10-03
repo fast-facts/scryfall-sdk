@@ -9,10 +9,36 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.base_ref }}
 
 jobs:
-  run:
-    name: Build on PR
+  node:
+    name: Build on PR - Node ${{ matrix.node }}
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]' || github.actor == 'renovate[bot]'
+    strategy:
+      fail-fast: false
+      # The suite calls the live Scryfall API. Do not run these in parallel.
+      max-parallel: 1
+      matrix:
+        node: [22, 24, 26]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+      - if: matrix.node == 24
+        run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  browser:
+    name: Build on PR - Browser
+    runs-on: ubuntu-latest
+    needs: node
+    if: ${{ !cancelled() && (github.actor == 'dependabot[bot]' || github.actor == 'renovate[bot]') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -23,7 +49,29 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
+      - run: npm install --no-save --no-package-lock @vitest/browser-playwright@5.0.3 playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - name: Write browser config
+        run: |
+          cat > vitest.browser.config.mts << 'EOF'
+          import { defineConfig } from 'vitest/config';
+          import { playwright } from '@vitest/browser-playwright';
+          import base from './vitest.config.mts';
 
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build
+          const test = { ...base.test };
+          delete test.environment;
+
+          export default defineConfig({
+            test: {
+              ...test,
+              browser: {
+                enabled: true,
+                headless: true,
+                provider: playwright(),
+                instances: [{ browser: 'chromium' }],
+              },
+            },
+          });
+          EOF
+      - run: npm test -- --config vitest.browser.config.mts
+

@@ -2,8 +2,8 @@ import { Color, ColorOrColorless, RESOURCE_GENERIC_CARD_BACK, SYMBOL_COST, SYMBO
 import Cached from '../util/Cached';
 import MagicEmitter from '../util/MagicEmitter';
 import MagicQuerier, { ApiCatalog, List, TOrArrayOfT } from '../util/MagicQuerier';
-import { Ruling } from './Rulings';
-import { Set } from './Sets';
+import Rulings, { Ruling } from './Rulings';
+import Sets, { Set } from './Sets';
 
 export enum UniqueStrategy {
   cards,
@@ -193,7 +193,6 @@ export enum RelatedCardComponent {
   combo_piece,
 }
 
-let Scry!: typeof import('../Scry');
 const SYMBOL_CARD = Symbol('CARD');
 
 export class RelatedCard {
@@ -212,7 +211,7 @@ export class RelatedCard {
 
   private [SYMBOL_CARD]?: Card;
   public async get() {
-    return this[SYMBOL_CARD] ??= await Scry.Cards.byId(this.id);
+    return this[SYMBOL_CARD] ??= await cards.byId(this.id);
   }
 }
 
@@ -558,18 +557,18 @@ export class Card implements CardFaceMethods {
 
   private [SYMBOL_SET]?: Set;
   public async getSet() {
-    return this[SYMBOL_SET] ??= await Scry.Sets.byId(this.set);
+    return this[SYMBOL_SET] ??= await Sets.byId(this.set);
   }
 
   private [SYMBOL_RULINGS]?: Ruling[];
   public async getRulings() {
-    return this[SYMBOL_RULINGS] ??= await Scry.Rulings.byId(this.id);
+    return this[SYMBOL_RULINGS] ??= await Rulings.byId(this.id);
   }
 
   private [SYMBOL_PRINTS]?: Card[];
   public async getPrints() {
     if (!this[SYMBOL_PRINTS]) {
-      this[SYMBOL_PRINTS] = await Scry.Cards.search(`oracleid:${this.oracle_id}`, { unique: 'prints' })
+      this[SYMBOL_PRINTS] = await cards.search(`oracleid:${this.oracle_id}`, { unique: 'prints' })
         .waitForAll();
 
       for (const card of this[SYMBOL_PRINTS]!) {
@@ -642,10 +641,6 @@ export class Card implements CardFaceMethods {
 }
 
 class Cards extends MagicQuerier {
-  protected set Scry(scry: typeof import('../Scry')) {
-    Scry = scry;
-  }
-
   public setSymbologyTransformer(transformer?: string | SymbologyTransformer) {
     symbologyTransformer = transformer;
     return this;
@@ -740,7 +735,9 @@ class Cards extends MagicQuerier {
     const emitter = new MagicEmitter<Card, CardIdentifier>()
       .map(Card.construct);
 
-    void this.processCollection(emitter, identifiers);
+    void this.processCollection(emitter, identifiers).catch((error: Error) => {
+      emitter.emit('error', error);
+    });
 
     return emitter;
   }
@@ -776,4 +773,5 @@ class Cards extends MagicQuerier {
   }
 }
 
-export default new Cards();
+const cards = new Cards();
+export default cards;

@@ -1,7 +1,7 @@
 import { IScry, SYMBOL_CARDS, SYMBOL_SET } from '../IScry';
 import Cached from '../util/Cached';
 import MagicQuerier, { List, TOrArrayOfT } from '../util/MagicQuerier';
-import { Card, SearchOptions } from './Cards';
+import cards, { Card, SearchOptions } from './Cards';
 
 type SetType =
   'core' |
@@ -29,8 +29,6 @@ type SetType =
   'minigame';
 
 type SetSearchOptions = Omit<SearchOptions, 'page'>;
-
-let Scry!: typeof import('../Scry');
 
 export class Set {
   object: 'set';
@@ -69,7 +67,7 @@ export class Set {
   }
 
   public search(query: string, options?: SetSearchOptions) {
-    return Scry.Cards.search(`s:${this.code} ${query}`, options)
+    return cards.search(`s:${this.code} ${query}`, options)
       .map(card => {
         card[SYMBOL_SET] ??= this;
         return card;
@@ -79,10 +77,6 @@ export class Set {
 }
 
 class Sets extends MagicQuerier {
-  protected set Scry(scry: typeof import('../Scry')) {
-    Scry = scry;
-  }
-
   @Cached
   public async all() {
     return (await this.query<List<Set>>('sets')).data
@@ -133,4 +127,5 @@ class Sets extends MagicQuerier {
   }
 }
 
-export default new Sets();
+const sets = new Sets();
+export default sets;

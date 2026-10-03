@@ -88,7 +88,7 @@ In the documentation below, requiring the package is assumed.
 import Scry = require("scryfall-sdk-updated");
 ```
 
-Needs Node.js 18 or newer.
+Needs Node.js 22 or newer.
 
 ### `Scry.setAgent (agent: string, version: string): void;` [🡅](#table-of-contents)
 > [!IMPORTANT]  

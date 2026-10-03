@@ -1,8 +1,7 @@
-import { Stream } from 'stream';
 import * as Scry from '../Scry';
 
 function isDownload(result: unknown) {
-  return result instanceof Stream || result instanceof ReadableStream;
+  return result instanceof ReadableStream;
 }
 
 describe('Bulk Data', () => {

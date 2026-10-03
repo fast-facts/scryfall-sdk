@@ -1,5 +1,3 @@
-import Cards from './api/Cards';
-import Sets from './api/Sets';
 import { IScry } from './IScry';
 import Cached from './util/Cached';
 import MagicQuerier, { minimumRequestTimeout, SearchError } from './util/MagicQuerier';
@@ -19,9 +17,6 @@ export { default as Sets } from './api/Sets';
 export * from './api/Symbology';
 export { default as Symbology } from './api/Symbology';
 export * from './IScry';
-
-Cards['Scry'] = exports;
-Sets['Scry'] = exports;
 
 /**
  * Sets the name and version of this agent. This is required for all non-browser applications.
