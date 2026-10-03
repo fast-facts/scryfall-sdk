@@ -1,27 +1,19 @@
-export const ENDPOINT_API = "https://api.scryfall.com";
-export const ENDPOINT_FILE_1 = "https://cards.scryfall.io";
-export const ENDPOINT_FILE_2 = "https://c2.scryfall.com/file";
-export const ENDPOINT_FILE_3 = "https://c3.scryfall.com/file";
+export const ENDPOINT_API = 'https://api.scryfall.com';
+export const ENDPOINT_FILE_1 = 'https://cards.scryfall.io';
+export const ENDPOINT_FILE_2 = 'https://c2.scryfall.com/file';
+export const ENDPOINT_FILE_3 = 'https://c3.scryfall.com/file';
 export const RESOURCE_GENERIC_CARD_BACK = `${ENDPOINT_FILE_2}/scryfall-errors/missing.jpg` as const;
 
-export const SYMBOL_TEXT = Symbol("TEXT");
-export const SYMBOL_COST = Symbol("COST");
-export const SYMBOL_SET = Symbol("SET");
-export const SYMBOL_RULINGS = Symbol("RULINGS");
-export const SYMBOL_PRINTS = Symbol("PRINTS");
-export const SYMBOL_CARDS = Symbol("CARDS");
+export const SYMBOL_TEXT = Symbol('TEXT');
+export const SYMBOL_COST = Symbol('COST');
+export const SYMBOL_SET = Symbol('SET');
+export const SYMBOL_RULINGS = Symbol('RULINGS');
+export const SYMBOL_PRINTS = Symbol('PRINTS');
+export const SYMBOL_CARDS = Symbol('CARDS');
 
-enum Colors {
-	W,
-	B,
-	R,
-	U,
-	G,
-}
+export type Color = 'W' | 'B' | 'R' | 'U' | 'G';
+export type ColorOrColorless = Color | 'C';
 
-export type Color = keyof typeof Colors;
-export type ColorOrColorless = keyof typeof Colors | "C";
+type FuzzySearch = <T>(search: string, targets: T[], key: keyof T) => T | undefined;
 
-export namespace IScry {
-	export let fuzzySearch: (<T>(search: string, targets: T[], key: keyof T) => T | undefined) | undefined;
-}
+export const IScry: { fuzzySearch?: FuzzySearch } = {};

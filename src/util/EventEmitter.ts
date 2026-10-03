@@ -1,110 +1,109 @@
-type NodeEventEmitter = import("node:events");
+type NodeEventEmitter = import('node:events');
 
 type Listener = (...args: any[]) => void;
 const EMPTY: Listener[] = [];
 
 class EventEmitter implements NodeEventEmitter {
+  private _maxListeners = 10;
+  private readonly _listeners: Record<string | symbol, Listener[]> = {};
 
-	private _maxListeners = 10;
-	private readonly _listeners: Record<string | symbol, Listener[]> = {};
+  public addListener(eventName: string | symbol, listener: Listener): this {
+    const listeners = this._listeners[eventName] ??= [];
+    listeners.push(listener);
+    if (listeners.length > this._maxListeners)
+      console.warn(`MaxListenersExceededWarning: Possible EventEmitter memory leak detected. ${listeners.length} ${eventName.toString()} listeners added. Use emitter.setMaxListeners() to increase limit`);
+    return this;
+  }
 
-	public addListener (eventName: string | symbol, listener: Listener): this {
-		const listeners = this._listeners[eventName] ??= [];
-		listeners.push(listener);
-		if (listeners.length > this._maxListeners)
-			console.warn(`MaxListenersExceededWarning: Possible EventEmitter memory leak detected. ${listeners.length} ${eventName.toString()} listeners added. Use emitter.setMaxListeners() to increase limit`);
-		return this;
-	}
+  public prependListener(eventName: string | symbol, listener: Listener): this {
+    const listeners = this._listeners[eventName] ??= [];
+    listeners.unshift(listener);
+    if (listeners.length > this._maxListeners)
+      console.warn(`MaxListenersExceededWarning: Possible EventEmitter memory leak detected. ${listeners.length} ${eventName.toString()} listeners added. Use emitter.setMaxListeners() to increase limit`);
+    return this;
+  }
 
-	public prependListener (eventName: string | symbol, listener: Listener): this {
-		const listeners = this._listeners[eventName] ??= [];
-		listeners.unshift(listener);
-		if (listeners.length > this._maxListeners)
-			console.warn(`MaxListenersExceededWarning: Possible EventEmitter memory leak detected. ${listeners.length} ${eventName.toString()} listeners added. Use emitter.setMaxListeners() to increase limit`);
-		return this;
-	}
+  public removeListener(eventName: string | symbol, listener: Listener): this {
+    const listeners = this._listeners[eventName];
+    if (listeners) {
+      const index = listeners.indexOf(listener);
+      if (index >= 0) {
+        if (listeners.length === 1)
+          delete this._listeners[eventName];
+        else
+          listeners.splice(index, 1);
+      }
+    }
 
-	public removeListener (eventName: string | symbol, listener: Listener): this {
-		const listeners = this._listeners[eventName];
-		if (listeners) {
-			const index = listeners.indexOf(listener);
-			if (index >= 0) {
-				if (listeners.length === 1)
-					delete this._listeners[eventName];
-				else
-					listeners.splice(index, 1);
-			}
-		}
+    return this;
+  }
 
-		return this;
-	}
+  public on(eventName: string | symbol, listener: Listener): this {
+    this.addListener(eventName, listener);
+    return this;
+  }
 
-	public on (eventName: string | symbol, listener: Listener): this {
-		this.addListener(eventName, listener);
-		return this;
-	}
+  public once(eventName: string | symbol, listener: Listener): this {
+    const realListener: Listener = (...args) => {
+      this.removeListener(eventName, realListener);
+      listener(...args);
+    };
+    this.addListener(eventName, realListener);
+    return this;
+  }
 
-	public once (eventName: string | symbol, listener: Listener): this {
-		const realListener: Listener = (...args) => {
-			this.removeListener(eventName, realListener);
-			listener(...args);
-		};
-		this.addListener(eventName, realListener);
-		return this;
-	}
+  public prependOnceListener(eventName: string | symbol, listener: Listener): this {
+    const realListener: Listener = (...args) => {
+      this.removeListener(eventName, realListener);
+      listener(...args);
+    };
+    this.prependListener(eventName, realListener);
+    return this;
+  }
 
-	public prependOnceListener (eventName: string | symbol, listener: Listener): this {
-		const realListener: Listener = (...args) => {
-			this.removeListener(eventName, realListener);
-			listener(...args);
-		};
-		this.prependListener(eventName, realListener);
-		return this;
-	}
+  public off(eventName: string | symbol, listener: Listener): this {
+    this.removeListener(eventName, listener);
+    return this;
+  }
 
-	public off (eventName: string | symbol, listener: Listener): this {
-		this.removeListener(eventName, listener);
-		return this;
-	}
+  public removeAllListeners(event?: string | symbol | undefined): this {
+    if (event !== undefined)
+      delete this._listeners[event];
+    return this;
+  }
 
-	public removeAllListeners (event?: string | symbol | undefined): this {
-		if (event !== undefined)
-			delete this._listeners[event];
-		return this;
-	}
+  public emit(eventName: string | symbol, ...args: any[]): boolean {
+    if (this._listeners[eventName])
+      for (const listener of this._listeners[eventName])
+        listener(...args);
+    return true;
+  }
 
-	public emit (eventName: string | symbol, ...args: any[]): boolean {
-		if (this._listeners[eventName]) 
-			for (const listener of this._listeners[eventName])
-				listener(...args);
-		return true;
-	}
+  public setMaxListeners(n: number): this {
+    this._maxListeners = n;
+    return this;
+  }
 
-	public setMaxListeners (n: number): this {
-		this._maxListeners = n;
-		return this;
-	}
+  public getMaxListeners(): number {
+    return this._maxListeners;
+  }
 
-	public getMaxListeners (): number {
-		return this._maxListeners;
-	}
+  public listeners(eventName: string | symbol): Listener[] {
+    const listeners = this._listeners[eventName];
+    return listeners ? [...listeners] : EMPTY;
+  }
 
-	public listeners (eventName: string | symbol): Listener[] {
-		const listeners = this._listeners[eventName];
-		return listeners ? [...listeners] : EMPTY;
-	}
+  public rawListeners(_eventName: string | symbol): Listener[] {
+    throw new Error('The rawListeners method is not available using this polyfill');
+  }
 
-	public rawListeners (eventName: string | symbol): Listener[] {
-		throw new Error("The rawListeners method is not available using this polyfill");
-	}
+  public listenerCount(eventName: string | symbol): number {
+    return this._listeners[eventName]?.length ?? 0;
+  }
 
-	public listenerCount (eventName: string | symbol): number {
-		return this._listeners[eventName]?.length ?? 0;
-	}
-
-	public eventNames (): (string | symbol)[] {
-		return Object.keys(this._listeners);
-	}
+  public eventNames(): (string | symbol)[] {
+    return Object.keys(this._listeners);
+  }
 }
 
 export default EventEmitter;
