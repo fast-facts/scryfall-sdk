@@ -1,8 +1,8 @@
 {
-	"name": "scryfall-sdk",
-	"version": "5.0.3",
-	"main": "./out/Scry.js",
-	"types": "./out/Scry.d.ts",
+	"name": "scryfall-sdk-updated",
+	"version": "0.0.0-semantic-release",
+	"main": "./Scry.js",
+	"types": "./Scry.d.ts",
 	"description": "A Node.js SDK for https://scryfall.com/docs/api written in Typescript.",
 	"keywords": [
 		"magic",
@@ -20,7 +20,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/ChiriVulpes/scryfall-sdk"
+		"url": "https://github.com/fast-facts/scryfall-sdk"
 	},
 	"devDependencies": {
 		"@types/node": "^26.6.4",
@@ -30,7 +30,7 @@
 		"vitest": "5.0.3"
 	},
 	"scripts": {
-		"build": "rm -rf out && tsc -p tsconfig.app.json",
+		"build": "rm -rf dist && tsc -p tsconfig.app.json && cp package.json README.md LICENSE DOCUMENTATION.md ROUTES.md dist",
 		"watch": "tsc -p tsconfig.app.json --watch",
 		"test": "vitest run",
 		"lint": "eslint ."

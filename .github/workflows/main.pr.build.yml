@@ -1,0 +1,29 @@
+name: Build on PR
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.base_ref }}
+
+jobs:
+  run:
+    name: Build on PR
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' || github.actor == 'renovate[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm ci
+
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

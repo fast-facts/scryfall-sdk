@@ -85,7 +85,7 @@
 
 In the documentation below, requiring the package is assumed.
 ```ts
-import Scry = require("scryfall-sdk");
+import Scry = require("scryfall-sdk-updated");
 ```
 
 Needs Node.js 18 or newer.
@@ -737,7 +737,7 @@ console.log(definition.object, definition.type); // "bulk_data rulings"
 
 
 ## Migrations [🡅](#table-of-contents)
-When Scryfall discovers invalid cards, they're removed and reported through the migrations API. Using scryfall-sdk, you can iterate through the recent migrations and update local data as necessary.
+When Scryfall discovers invalid cards, they're removed and reported through the migrations API. Using scryfall-sdk-updated, you can iterate through the recent migrations and update local data as necessary.
 
 ### `Migrations.all (page?: number): MagicEmitter<Migration>;` [🡅](#table-of-contents)
 
@@ -812,7 +812,7 @@ Scry.setTimeout(1000);
 Many, but not all query functions cache their results. For example, trying to get a card by ID twice will return the cached copy, rather than requesting it from Scryfall again. Each query's result is cached individually, so it won't be re-downloaded until the cached value expires.
 
 #### Notes:
-- By default, scryfall-sdk uses a cache duration of 1 hour.
+- By default, scryfall-sdk-updated uses a cache duration of 1 hour.
 - The minimum supported cache time is 10 seconds. Putting a value lower than this disables caching entirely.
 - **A cached value expiring does not immediately remove it.** If your application needs to conserve memory, lower the cache limit with `setCacheLimit`. If cached results are keeping your application open, use `Scry.clearCache()`
 

@@ -1,6 +1,6 @@
-# scryfall-sdk
-[![npm](https://img.shields.io/npm/v/scryfall-sdk.svg?style=flat-square)](https://www.npmjs.com/package/scryfall-sdk)
-[![GitHub issues](https://img.shields.io/github/issues/ChiriVulpes/scryfall-sdk.svg?style=flat-square)](https://github.com/ChiriVulpes/scryfall-sdk)
+# scryfall-sdk-updated
+[![npm](https://img.shields.io/npm/v/scryfall-sdk-updated.svg?style=flat-square)](https://www.npmjs.com/package/scryfall-sdk-updated)
+[![GitHub issues](https://img.shields.io/github/issues/fast-facts/scryfall-sdk.svg?style=flat-square)](https://github.com/fast-facts/scryfall-sdk)
 
 A Node.js SDK for [Scryfall](https://scryfall.com/docs/api) written in Typescript.
 
@@ -10,7 +10,7 @@ Covers the card, set, ruling, symbology, catalog, bulk data, and migration endpo
 ## Installation
 
 ```bat
-npm install scryfall-sdk
+npm install scryfall-sdk-updated
 ```
 
 Needs Node.js 18 or newer.
@@ -18,7 +18,7 @@ Needs Node.js 18 or newer.
 
 ## Basic Example Usage
 ```ts
-import * as Scry from "scryfall-sdk";
+import * as Scry from "scryfall-sdk-updated";
 
 // ...in some function somewhere...
 const chalice = await Scry.Cards.byName("Chalice of the Void");
@@ -37,16 +37,16 @@ console.log(prints.length); // 7
 > ```
 
 ## [Full Documentation](./DOCUMENTATION.md)
-scryfall-sdk supports all features of Scryfall, along with automatically paginating through results, downloading bulk data streams, and more. See the [documentation](./DOCUMENTATION.md) for information on everything you can do.
+scryfall-sdk-updated supports all features of Scryfall, along with automatically paginating through results, downloading bulk data streams, and more. See the [documentation](./DOCUMENTATION.md) for information on everything you can do.
 
-Know the endpoint you want, but not sure what it looks like in scryfall-sdk? Well, you're in luck: [Scryfall-SDK Equivalents for Scryfall Routes](./ROUTES.md)
+Know the endpoint you want, but not sure what it looks like in scryfall-sdk-updated? Well, you're in luck: [Scryfall-SDK Equivalents for Scryfall Routes](./ROUTES.md)
 
 
 ## Contributing
 
 Thanks for wanting to help out! Here's the setup you'll have to do:
 ```bat
-git clone https://github.com/ChiriVulpes/scryfall-sdk
+git clone https://github.com/fast-facts/scryfall-sdk
 cd scryfall-sdk
 npm install
 ```
