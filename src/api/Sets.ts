@@ -141,15 +141,14 @@ class Sets extends MagicQuerier {
     if (result)
       return result;
 
-    const error = new Error(`No sets found matching “${name}”`) as any;
+    const error = new Error(`No sets found matching “${name}”`) as Error & { status: number; code: string };
     error.status = 404;
     error.code = 'not_found';
     throw error;
   }
 
-  private async querySet(apiPath: TOrArrayOfT<string | number | undefined>, query?: Record<string, any>, post?: any): Promise<Set> {
-    return await this.query<Set>(apiPath, query, post)
-      .then(Set.construct);
+  private querySet(apiPath: TOrArrayOfT<string | number | undefined>) {
+    return this.query<Set>(apiPath).then(Set.construct);
   }
 }
 

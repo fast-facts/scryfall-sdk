@@ -28,7 +28,7 @@ export function setAgent(agent: string, version: string) {
 }
 
 /**
- * Sets the API calls to retry if they fail, for any reason.
+ * Sets how failed API calls are retried. Network errors always retry, even if `canRetry` returns false. By default, not_found and bad_request do not.
  * @param attempts The number of attempts that can be made (includes the initial call).
  * @param timeout The time that the query should wait before attempting the request again.
  * @param canRetry The check for whether a failed call should be tried again.
@@ -71,7 +71,7 @@ export function setCacheLimit(amount: number) {
 }
 
 /**
- * Sets the function used to find a close name match.
+ * Sets the function used to find a close name match. Used by `Sets.byName`. Exact names only when unset.
  * @param search The function that picks a close match.
  */
 export function setFuzzySearch(search?: typeof IScry['fuzzySearch']) {

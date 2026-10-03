@@ -2,7 +2,6 @@ import { Color, ColorOrColorless, RESOURCE_GENERIC_CARD_BACK, SYMBOL_COST, SYMBO
 import { Cached } from '../util/Cached';
 import MagicEmitter from '../util/MagicEmitter';
 import MagicQuerier, { ApiCatalog, List, TOrArrayOfT } from '../util/MagicQuerier';
-import cards from './Cards';
 import Rulings, { Ruling } from './Rulings';
 import Sets, { Set } from './Sets';
 
@@ -473,7 +472,7 @@ let symbologyTransformer: SymbologyTransformer | string | undefined;
 const REGEX_SYMBOLOGY = /{([a-z]|\d+)(?:\/([a-z]))?}/gi;
 
 function transform(self: Card,
-  key: keyof { [KEY in keyof Card as Card[KEY] extends string | null | undefined ? KEY : never]: any },
+  key: keyof { [KEY in keyof Card as Card[KEY] extends string | null | undefined ? KEY : never]: unknown },
   map: WeakMap<SymbologyTransformer, string>) {
   const text = self[key];
   const transformer = symbologyTransformer;
@@ -499,7 +498,6 @@ export type AttractionLight = 1 | 2 | 3 | 4 | 5 | 6;
 export class Card implements CardFaceMethods {
   object: 'card';
 
-  // core fields
   arena_id?: number | null;
   id: string;
   lang: string;
@@ -516,7 +514,6 @@ export class Card implements CardFaceMethods {
   scryfall_uri: string;
   uri: string;
 
-  // gameplay fields
   all_parts?: RelatedCard[] | null;
   card_faces: CardFace[];
   cmc: number;
@@ -539,7 +536,6 @@ export class Card implements CardFaceMethods {
   toughness?: string | null;
   type_line: string;
 
-  // print fields
   artist?: string | null;
   artist_ids?: string[] | null;
   attraction_lights?: AttractionLight[] | null;
@@ -597,6 +593,7 @@ export class Card implements CardFaceMethods {
     if (!card.card_faces)
       card.card_faces = [{ object: 'card_face' } as CardFace];
 
+    // Prototype is the card, so a face method uses face fields, then card fields.
     for (const face of card.card_faces)
       Object.setPrototypeOf(face, card);
 
@@ -695,6 +692,7 @@ export class Card implements CardFaceMethods {
 
   /**
    * Returns the back-face image link at the given size.
+   * Transform and double-faced token cards use the back face. Other layouts use the generic card back.
    * @param version The image size to return.
    */
   public getBackImageURI(version: keyof ImageUris) {
@@ -734,12 +732,10 @@ class Cards extends MagicQuerier {
       set = undefined;
     }
 
-    const promise = this.queryCard('cards/named', {
+    return this.queryCard('cards/named', {
       [fuzzy ? 'fuzzy' : 'exact']: name,
       set,
     });
-
-    return promise;
   }
 
   /**
@@ -886,17 +882,15 @@ class Cards extends MagicQuerier {
     return emitter;
   }
 
-  private async queryCard(apiPath: TOrArrayOfT<string | number | undefined>, query?: Record<string, any>, post?: any): Promise<Card> {
-    return await this.query<Card>(apiPath, query, post)
-      .then(Card.construct);
+  private queryCard(apiPath: TOrArrayOfT<string | number | undefined>, query?: Record<string, any>) {
+    return this.query<Card>(apiPath, query).then(Card.construct);
   }
 
   private async processCollection(emitter: MagicEmitter<Card, CardIdentifier>, identifiers: CardIdentifier[]) {
     for (let i = 0; i < identifiers.length; i += 75) {
       if (emitter.cancelled) break;
 
-      // the api only supports a max collection size of 75, so we take the list of identifiers (any length)
-      // and split it into 75 card-max requests
+      // Scryfall accepts at most 75 identifiers per request.
       const collectionSection = { identifiers: identifiers.slice(i, i + 75) };
 
       const { data, not_found } = await this.query<List<Card, CardIdentifier>>('cards/collection', undefined, collectionSection);
@@ -917,4 +911,5 @@ class Cards extends MagicQuerier {
   }
 }
 
-export default new Cards();
+const cards = new Cards();
+export default cards;

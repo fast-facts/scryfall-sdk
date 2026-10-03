@@ -8,13 +8,17 @@ export interface Ruling {
 }
 
 class Rulings extends MagicQuerier {
+  private rulings(...path: (string | number)[]) {
+    return this.query<List<Ruling>>(path).then(list => list.data);
+  }
+
   /**
    * Returns the rulings for the card with the given id.
    * @param id The Scryfall id of the card.
    */
   @Cached
-  public async byId(id: string) {
-    return (await this.query<List<Ruling>>(['cards', id, 'rulings'])).data;
+  public byId(id: string) {
+    return this.rulings('cards', id, 'rulings');
   }
 
   /**
@@ -23,8 +27,8 @@ class Rulings extends MagicQuerier {
    * @param collectorNumber The collector number of the card.
    */
   @Cached
-  public async bySet(setCode: string, collectorNumber: string | number) {
-    return (await this.query<List<Ruling>>(['cards', setCode, `${collectorNumber}`, 'rulings'])).data;
+  public bySet(setCode: string, collectorNumber: string | number) {
+    return this.rulings('cards', setCode, `${collectorNumber}`, 'rulings');
   }
 
   /**
@@ -32,8 +36,8 @@ class Rulings extends MagicQuerier {
    * @param id The Multiverse id of the card.
    */
   @Cached
-  public async byMultiverseId(id: number) {
-    return (await this.query<List<Ruling>>(['cards/multiverse', id, 'rulings'])).data;
+  public byMultiverseId(id: number) {
+    return this.rulings('cards/multiverse', id, 'rulings');
   }
 
   /**
@@ -41,8 +45,8 @@ class Rulings extends MagicQuerier {
    * @param id The Magic Online id of the card.
    */
   @Cached
-  public async byMtgoId(id: number) {
-    return (await this.query<List<Ruling>>(['cards/mtgo', id, 'rulings'])).data;
+  public byMtgoId(id: number) {
+    return this.rulings('cards/mtgo', id, 'rulings');
   }
 
   /**
@@ -50,8 +54,8 @@ class Rulings extends MagicQuerier {
    * @param id The Arena id of the card.
    */
   @Cached
-  public async byArenaId(id: number) {
-    return (await this.query<List<Ruling>>(['cards/arena', id, 'rulings'])).data;
+  public byArenaId(id: number) {
+    return this.rulings('cards/arena', id, 'rulings');
   }
 }
 

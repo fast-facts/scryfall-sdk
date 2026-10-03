@@ -7,9 +7,17 @@ function imagePath(url?: string | null) {
 }
 
 describe('Cards', () => {
-  it('by id', async () => {
-    const card = await Scry.Cards.byId('9ea8179a-d3c9-4cdc-a5b5-68cc73279050');
-    expect(card.name).toBe('Blood Scrivener');
+  it.each([
+    ['by id', () => Scry.Cards.byId('9ea8179a-d3c9-4cdc-a5b5-68cc73279050'), 'Blood Scrivener'],
+    ['by set', () => Scry.Cards.bySet('dgm', 22), 'Blood Scrivener'],
+    ['by set collector number', () => Scry.Cards.bySet('unf', '200a'), 'Balloon Stand'],
+    ['by multiverse id', () => Scry.Cards.byMultiverseId(369030), 'Blood Scrivener'],
+    ['by mtgo id', () => Scry.Cards.byMtgoId(48338), 'Blood Scrivener'],
+    ['by arena id', () => Scry.Cards.byArenaId(67330), 'Yargle, Glutton of Urborg'],
+    ['by tcg player id', () => Scry.Cards.byTcgPlayerId(1030), 'Ankh of Mishra'],
+    ['by cardmarket id', () => Scry.Cards.byCardmarketId(681770), 'Phyrexian Fleshgorger'],
+  ])('%s', async (_name, load, name) => {
+    expect((await load()).name).toBe(name);
   });
 
   describe('by name,', () => {
@@ -36,41 +44,6 @@ describe('Cards', () => {
       expect(card?.name).toBe('Loxodon Warhammer');
       expect(card?.set).toBe('mrd');
     });
-  });
-
-  it('by set', async () => {
-    const card = await Scry.Cards.bySet('dgm', 22);
-    expect(card.name).toBe('Blood Scrivener');
-  });
-
-  it('by set - string collectorNumber', async () => {
-    const card = await Scry.Cards.bySet('unf', '200a');
-    expect(card.name).toBe('Balloon Stand');
-  });
-
-  it('by multiverse id', async () => {
-    const card = await Scry.Cards.byMultiverseId(369030);
-    expect(card.name).toBe('Blood Scrivener');
-  });
-
-  it('by mtgo id', async () => {
-    const card = await Scry.Cards.byMtgoId(48338);
-    expect(card.name).toBe('Blood Scrivener');
-  });
-
-  it('by arena id', async () => {
-    const card = await Scry.Cards.byArenaId(67330);
-    expect(card.name).toBe('Yargle, Glutton of Urborg');
-  });
-
-  it('by tcg player id', async () => {
-    const card = await Scry.Cards.byTcgPlayerId(1030);
-    expect(card.name).toBe('Ankh of Mishra');
-  });
-
-  it('by cardmarket id', async () => {
-    const card = await Scry.Cards.byCardmarketId(681770);
-    expect(card.name).toBe('Phyrexian Fleshgorger');
   });
 
   it('in lang', async () => {
@@ -149,11 +122,12 @@ describe('Cards', () => {
   });
 
   it('autocomplete name with extras', async () => {
-    const cardNames = await Scry.Cards.autoCompleteName('treasure', true);
-    expect(cardNames.length).toBeGreaterThan(0);
+    const plain = await Scry.Cards.autoCompleteName('treasure');
+    const extras = await Scry.Cards.autoCompleteName('treasure', true);
+    expect(extras.length).toBeGreaterThan(plain.length);
   });
 
-  it('sorts by penny and review', async () => {
+  it('accepts penny and review order', async () => {
     const penny = await Scry.Cards.search('t:creature', { order: 'penny' }).cancelAfterPage().waitForAll();
     expect(penny.length).toBeGreaterThan(0);
     const review = await Scry.Cards.search('t:creature', { order: 'review' }).cancelAfterPage().waitForAll();
@@ -179,40 +153,18 @@ describe('Cards', () => {
   });
 
   describe('Collection', () => {
-    it('by id', async () => {
-      const cards = await Scry.Cards.collection(Scry.CardIdentifier.byId('94c70f23-0ca9-425e-a53a-6c09921c0075')).waitForAll();
+    it.each([
+      ['by id', Scry.CardIdentifier.byId('94c70f23-0ca9-425e-a53a-6c09921c0075'), 'Crush Dissent'],
+      ['by multiverse id', Scry.CardIdentifier.byMultiverseId(462293), 'Contentious Plan'],
+      ['by mtgo id', Scry.CardIdentifier.byMtgoId(71692), 'Bond of Insight'],
+      ['by oracle id', Scry.CardIdentifier.byOracleId('394c6de5-7957-4a0b-a6b9-ee0c707cd022'), 'Forgotten Cave'],
+      ['by illustration id', Scry.CardIdentifier.byIllustrationId('99f43949-049e-41e2-bf4c-e22e11790012'), 'GO TO JAIL'],
+      ['by name', Scry.CardIdentifier.byName('Blood Scrivener'), 'Blood Scrivener'],
+      ['by set', Scry.CardIdentifier.bySet('mrd', '150'), 'Chalice of the Void'],
+    ])('%s', async (_name, identifier, name) => {
+      const cards = await Scry.Cards.collection(identifier).waitForAll();
       expect(cards).toHaveLength(1);
-      expect(cards[0].name).toBe('Crush Dissent');
-    });
-
-    it('by multiverse id', async () => {
-      const cards = await Scry.Cards.collection(Scry.CardIdentifier.byMultiverseId(462293)).waitForAll();
-      expect(cards).toHaveLength(1);
-      expect(cards[0].name).toBe('Contentious Plan');
-    });
-
-    it('by mtgo id', async () => {
-      const cards = await Scry.Cards.collection(Scry.CardIdentifier.byMtgoId(71692)).waitForAll();
-      expect(cards).toHaveLength(1);
-      expect(cards[0].name).toBe('Bond of Insight');
-    });
-
-    it('by oracle id', async () => {
-      const cards = await Scry.Cards.collection(Scry.CardIdentifier.byOracleId('394c6de5-7957-4a0b-a6b9-ee0c707cd022')).waitForAll();
-      expect(cards).toHaveLength(1);
-      expect(cards[0].name).toBe('Forgotten Cave');
-    });
-
-    it('by illustration id', async () => {
-      const cards = await Scry.Cards.collection(Scry.CardIdentifier.byIllustrationId('99f43949-049e-41e2-bf4c-e22e11790012')).waitForAll();
-      expect(cards).toHaveLength(1);
-      expect(cards[0].name).toBe('GO TO JAIL');
-    });
-
-    it('by name', async () => {
-      const cards = await Scry.Cards.collection(Scry.CardIdentifier.byName('Blood Scrivener')).waitForAll();
-      expect(cards).toHaveLength(1);
-      expect(cards[0].name).toBe('Blood Scrivener');
+      expect(cards[0].name).toBe(name);
     });
 
     it('by name & set', async () => {
@@ -220,12 +172,6 @@ describe('Cards', () => {
       expect(cards).toHaveLength(1);
       expect(cards[0].name).toBe('Lightning Bolt');
       expect(cards[0].set).toBe('prm');
-    });
-
-    it('by set', async () => {
-      const cards = await Scry.Cards.collection(Scry.CardIdentifier.bySet('mrd', '150')).waitForAll();
-      expect(cards).toHaveLength(1);
-      expect(cards[0].name).toBe('Chalice of the Void');
     });
 
     it('by multiverse id, 100 cards', async () => {
@@ -306,6 +252,8 @@ describe('Cards', () => {
       const card = await Scry.Cards.byId('41bd76f3-299d-4bc0-a603-2cc7db7dac7b');
       Scry.Cards.setSymbologyTransformer(':mana-$1$2:');
       expect(card.getText()).toBe(':mana-1::mana-U:, :mana-T:: Target creature gains flying until end of turn.');
+      Scry.Cards.setSymbologyTransformer();
+      expect(card.getText()).toBe(card.oracle_text);
     });
 
     it('getCost', async () => {

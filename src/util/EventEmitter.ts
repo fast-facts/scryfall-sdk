@@ -39,8 +39,7 @@ export default class EventEmitter implements NodeEventEmitter {
   }
 
   public on(eventName: string | symbol, listener: Listener): this {
-    this.addListener(eventName, listener);
-    return this;
+    return this.addListener(eventName, listener);
   }
 
   public once(eventName: string | symbol, listener: Listener): this {
@@ -62,8 +61,7 @@ export default class EventEmitter implements NodeEventEmitter {
   }
 
   public off(eventName: string | symbol, listener: Listener): this {
-    this.removeListener(eventName, listener);
-    return this;
+    return this.removeListener(eventName, listener);
   }
 
   public removeAllListeners(event?: string | symbol | undefined): this {

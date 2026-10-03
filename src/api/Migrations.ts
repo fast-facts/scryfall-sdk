@@ -37,7 +37,7 @@ class Migrations extends MagicQuerier {
    * Returns the card id migration with the given id.
    * @param id The id of the migration.
    */
-  public async byId(id: string) {
+  public byId(id: string) {
     return this.query<Migration>(['migrations', id]);
   }
 }

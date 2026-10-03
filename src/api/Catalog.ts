@@ -2,104 +2,108 @@ import { Cached } from '../util/Cached';
 import MagicQuerier, { ApiCatalog } from '../util/MagicQuerier';
 
 class Catalog extends MagicQuerier {
-  @Cached
-  public async cardNames() {
-    return (await this.query<ApiCatalog>('catalog/card-names')).data;
+  private list(path: string) {
+    return this.query<ApiCatalog>(path).then(result => result.data);
   }
 
   @Cached
-  public async artistNames() {
-    return (await this.query<ApiCatalog>('catalog/artist-names')).data;
+  public cardNames() {
+    return this.list('catalog/card-names');
   }
 
   @Cached
-  public async wordBank() {
-    return (await this.query<ApiCatalog>('catalog/word-bank')).data;
+  public artistNames() {
+    return this.list('catalog/artist-names');
   }
 
   @Cached
-  public async creatureTypes() {
-    return (await this.query<ApiCatalog>('catalog/creature-types')).data;
+  public wordBank() {
+    return this.list('catalog/word-bank');
   }
 
   @Cached
-  public async planeswalkerTypes() {
-    return (await this.query<ApiCatalog>('catalog/planeswalker-types')).data;
+  public creatureTypes() {
+    return this.list('catalog/creature-types');
   }
 
   @Cached
-  public async landTypes() {
-    return (await this.query<ApiCatalog>('catalog/land-types')).data;
+  public planeswalkerTypes() {
+    return this.list('catalog/planeswalker-types');
   }
 
   @Cached
-  public async artifactTypes() {
-    return (await this.query<ApiCatalog>('catalog/artifact-types')).data;
+  public landTypes() {
+    return this.list('catalog/land-types');
   }
 
   @Cached
-  public async enchantmentTypes() {
-    return (await this.query<ApiCatalog>('catalog/enchantment-types')).data;
+  public artifactTypes() {
+    return this.list('catalog/artifact-types');
   }
 
   @Cached
-  public async spellTypes() {
-    return (await this.query<ApiCatalog>('catalog/spell-types')).data;
+  public enchantmentTypes() {
+    return this.list('catalog/enchantment-types');
   }
 
   @Cached
-  public async powers() {
-    return (await this.query<ApiCatalog>('catalog/powers')).data;
+  public spellTypes() {
+    return this.list('catalog/spell-types');
   }
 
   @Cached
-  public async toughnesses() {
-    return (await this.query<ApiCatalog>('catalog/toughnesses')).data;
+  public powers() {
+    return this.list('catalog/powers');
   }
 
   @Cached
-  public async loyalties() {
-    return (await this.query<ApiCatalog>('catalog/loyalties')).data;
+  public toughnesses() {
+    return this.list('catalog/toughnesses');
   }
 
   @Cached
-  public async watermarks() {
-    return (await this.query<ApiCatalog>('catalog/watermarks')).data;
+  public loyalties() {
+    return this.list('catalog/loyalties');
   }
 
   @Cached
-  public async keywordAbilities() {
-    return (await this.query<ApiCatalog>('catalog/keyword-abilities')).data;
+  public watermarks() {
+    return this.list('catalog/watermarks');
   }
 
   @Cached
-  public async keywordActions() {
-    return (await this.query<ApiCatalog>('catalog/keyword-actions')).data;
+  public keywordAbilities() {
+    return this.list('catalog/keyword-abilities');
   }
 
   @Cached
-  public async abilityWords() {
-    return (await this.query<ApiCatalog>('catalog/ability-words')).data;
+  public keywordActions() {
+    return this.list('catalog/keyword-actions');
   }
 
   @Cached
-  public async supertypes() {
-    return (await this.query<ApiCatalog>('catalog/supertypes')).data;
+  public abilityWords() {
+    return this.list('catalog/ability-words');
   }
 
   @Cached
-  public async battleTypes() {
-    return (await this.query<ApiCatalog>('catalog/battle-types')).data;
+  public supertypes() {
+    return this.list('catalog/supertypes');
   }
 
   @Cached
-  public async flavorWords() {
-    return (await this.query<ApiCatalog>('catalog/flavor-words')).data;
+  public battleTypes() {
+    return this.list('catalog/battle-types');
   }
 
   @Cached
-  public async cardTypes() {
-    return (await this.query<ApiCatalog>('catalog/card-types')).data;
+  public flavorWords() {
+    return this.list('catalog/flavor-words');
+  }
+
+  @Cached
+  public cardTypes() {
+    return this.list('catalog/card-types');
   }
 }
 

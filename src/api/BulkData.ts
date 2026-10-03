@@ -37,10 +37,6 @@ class BulkData extends MagicQuerier {
     return this.download(id, lastDownload);
   }
 
-  ////////////////////////////////////
-  // Definitions
-  //
-
   @Cached
   public async definitions() {
     return (await this.query<List<BulkDataDefinition>>('bulk-data')).data;
@@ -63,10 +59,6 @@ class BulkData extends MagicQuerier {
   public async definitionById(id: string) {
     return this.definition(id);
   }
-
-  ////////////////////////////////////
-  // Internals
-  //
 
   private async download(idOrType: string, lastDownload: string | number | Date) {
     const definition = await this.definition(idOrType);

@@ -88,8 +88,7 @@ export default class MagicEmitter<T, NOT_FOUND = never> extends EventEmitter {
 
   public async waitForAll() {
     return new Promise<MagicArray<T, NOT_FOUND>>((resolve, reject) => {
-      const results: MagicArray<T, NOT_FOUND> = [] as any;
-      results.not_found = [];
+      const results = Object.assign([] as T[], { not_found: [] as NOT_FOUND[] });
       this.on('data', result => { results.push(result); });
       this.on('not_found', notFound => { results.not_found.push(notFound); });
       this.on('done', () => resolve(results));
@@ -121,13 +120,12 @@ export default class MagicEmitter<T, NOT_FOUND = never> extends EventEmitter {
   private generate(event: 'data'): AsyncGenerator<T, void, unknown>;
   private generate(event: 'not_found'): AsyncGenerator<NOT_FOUND, void, unknown>;
   private async* generate(event: string): AsyncGenerator<T | NOT_FOUND, void, unknown> {
-    // save the new data on each event
-    const unyielded: any[] = [];
-    this.on(event as never, data => unyielded.push(data));
+    const unyielded: (T | NOT_FOUND)[] = [];
+    // Store first so the wait below cannot miss a value that arrives immediately.
+    super.on(event, (data: T | NOT_FOUND) => unyielded.push(data));
 
     while (!this._ended) {
-      // wait for the next event before yielding any new data
-      await new Promise(resolve => this.once(event as never, resolve));
+      await new Promise(resolve => { this.once(event, resolve); });
 
       let data = unyielded.shift();
       while (data !== undefined) {

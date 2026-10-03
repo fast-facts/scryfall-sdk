@@ -1,19 +1,12 @@
 import * as Scry from '../Scry';
 
 describe('Sets', () => {
-  it('by code', async () => {
-    const set = await Scry.Sets.byCode('hou');
-    expect(set.name).toBe('Hour of Devastation');
-  });
-
-  it('by id', async () => {
-    const set = await Scry.Sets.byId('65ff168b-bb94-47a5-a8f9-4ec6c213e768');
-    expect(set.name).toBe('Hour of Devastation');
-  });
-
-  it('by tgc player id', async () => {
-    const set = await Scry.Sets.byTcgPlayerId(1934);
-    expect(set.name).toBe('Hour of Devastation');
+  it.each([
+    ['by code', () => Scry.Sets.byCode('hou')],
+    ['by id', () => Scry.Sets.byId('65ff168b-bb94-47a5-a8f9-4ec6c213e768')],
+    ['by tcg player id', () => Scry.Sets.byTcgPlayerId(1934)],
+  ])('%s', async (_name, load) => {
+    expect((await load()).name).toBe('Hour of Devastation');
   });
 
   it('all', async () => {
@@ -24,15 +17,21 @@ describe('Sets', () => {
   describe('byName', () => {
     it('exact', async () => {
       const result = await Scry.Sets.byName('hour of devastation');
-      expect(result?.name).toBe('Hour of Devastation');
+      expect(result.name).toBe('Hour of Devastation');
       await expect(Scry.Sets.byName('hou')).rejects.toMatchObject({ status: 404 });
     });
 
     it('fuzzy', async () => {
+      await expect(Scry.Sets.byName('hou', true)).rejects.toMatchObject({ status: 404 });
+      Scry.clearCache();
       Scry.setFuzzySearch((search, targets) => search === 'hou' ? targets.find(set => set.code === 'hou') : undefined);
-      const result = await Scry.Sets.byName('hou', true);
-      expect(result?.name).toBe('Hour of Devastation');
-      await expect(Scry.Sets.byName('lskadjflaskdjfsladkfj', true)).rejects.toMatchObject({ status: 404 });
+      try {
+        const result = await Scry.Sets.byName('hou', true);
+        expect(result.name).toBe('Hour of Devastation');
+        await expect(Scry.Sets.byName('lskadjflaskdjfsladkfj', true)).rejects.toMatchObject({ status: 404 });
+      } finally {
+        Scry.setFuzzySearch();
+      }
     });
   });
 

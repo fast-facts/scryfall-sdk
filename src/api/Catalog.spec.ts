@@ -1,103 +1,30 @@
 import * as Scry from '../Scry';
 
+const atLeast = (min: number) => (rows: string[]) => expect(rows.length).toBeGreaterThanOrEqual(min);
+
 describe('Catalog', () => {
-  it('card names', async () => {
-    const result = await Scry.Catalog.cardNames();
-    expect(result.length).toBeGreaterThanOrEqual(18059);
-  });
-
-  it('artist names', async () => {
-    const result = await Scry.Catalog.artistNames();
-    expect(result.length).toBeGreaterThanOrEqual(676);
-  });
-
-  it('word bank', async () => {
-    const result = await Scry.Catalog.wordBank();
-    expect(result.length).toBeGreaterThanOrEqual(12892);
-  });
-
-  it('creature types', async () => {
-    const result = await Scry.Catalog.creatureTypes();
-    expect(result.length).toBeGreaterThanOrEqual(242);
-  });
-
-  it('planeswalker types', async () => {
-    const result = await Scry.Catalog.planeswalkerTypes();
-    expect(result.length).toBeGreaterThanOrEqual(42);
-  });
-
-  it('land types', async () => {
-    const result = await Scry.Catalog.landTypes();
-    expect(result.length).toBeGreaterThanOrEqual(13);
-  });
-
-  it('artifact types', async () => {
-    const result = await Scry.Catalog.artifactTypes();
-    expect(result.length).toBeGreaterThanOrEqual(6);
-  });
-
-  it('enchantment types', async () => {
-    const result = await Scry.Catalog.enchantmentTypes();
-    expect(result.length).toBeGreaterThanOrEqual(5);
-  });
-
-  it('spell types', async () => {
-    const result = await Scry.Catalog.spellTypes();
-    expect(result.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('powers', async () => {
-    const result = await Scry.Catalog.powers();
-    expect(result.length).toBeGreaterThanOrEqual(33);
-  });
-
-  it('toughnesses', async () => {
-    const result = await Scry.Catalog.toughnesses();
-    expect(result.length).toBeGreaterThanOrEqual(35);
-  });
-
-  it('loyalties', async () => {
-    const result = await Scry.Catalog.loyalties();
-    expect(result.length).toBeGreaterThanOrEqual(9);
-  });
-
-  it('watermarks', async () => {
-    const result = await Scry.Catalog.watermarks();
-    expect(result.length).toBeGreaterThanOrEqual(50);
-  });
-
-  it('keyword-abilities', async () => {
-    const result = await Scry.Catalog.keywordAbilities();
-    expect(result.length).toBeGreaterThanOrEqual(176);
-  });
-
-  it('keyword-actions', async () => {
-    const result = await Scry.Catalog.keywordActions();
-    expect(result.length).toBeGreaterThanOrEqual(46);
-  });
-
-  it('ability-words', async () => {
-    const result = await Scry.Catalog.abilityWords();
-    expect(result.length).toBeGreaterThanOrEqual(49);
-  });
-
-  it('supertypes', async () => {
-    const result = await Scry.Catalog.supertypes();
-    expect(result.length).toBeGreaterThanOrEqual(7);
-  });
-
-  it('battle types', async () => {
-    const result = await Scry.Catalog.battleTypes();
-    expect(result).toContain('Siege');
-  });
-
-  it('flavor words', async () => {
-    const result = await Scry.Catalog.flavorWords();
-    expect(result.length).toBeGreaterThan(0);
-  });
-
-  it('card types', async () => {
-    const result = await Scry.Catalog.cardTypes();
-    expect(result).toContain('Creature');
+  it.each([
+    ['card names', () => Scry.Catalog.cardNames(), atLeast(18059)],
+    ['artist names', () => Scry.Catalog.artistNames(), atLeast(676)],
+    ['word bank', () => Scry.Catalog.wordBank(), atLeast(12892)],
+    ['creature types', () => Scry.Catalog.creatureTypes(), atLeast(242)],
+    ['planeswalker types', () => Scry.Catalog.planeswalkerTypes(), atLeast(42)],
+    ['land types', () => Scry.Catalog.landTypes(), atLeast(13)],
+    ['artifact types', () => Scry.Catalog.artifactTypes(), atLeast(6)],
+    ['enchantment types', () => Scry.Catalog.enchantmentTypes(), atLeast(5)],
+    ['spell types', () => Scry.Catalog.spellTypes(), atLeast(2)],
+    ['powers', () => Scry.Catalog.powers(), atLeast(33)],
+    ['toughnesses', () => Scry.Catalog.toughnesses(), atLeast(35)],
+    ['loyalties', () => Scry.Catalog.loyalties(), atLeast(9)],
+    ['watermarks', () => Scry.Catalog.watermarks(), atLeast(50)],
+    ['keyword abilities', () => Scry.Catalog.keywordAbilities(), atLeast(176)],
+    ['keyword actions', () => Scry.Catalog.keywordActions(), atLeast(46)],
+    ['ability words', () => Scry.Catalog.abilityWords(), atLeast(49)],
+    ['supertypes', () => Scry.Catalog.supertypes(), atLeast(7)],
+    ['battle types', () => Scry.Catalog.battleTypes(), (rows: string[]) => expect(rows).toContain('Siege')],
+    ['flavor words', () => Scry.Catalog.flavorWords(), (rows: string[]) => expect(rows.length).toBeGreaterThan(0)],
+    ['card types', () => Scry.Catalog.cardTypes(), (rows: string[]) => expect(rows).toContain('Creature')],
+  ])('%s', async (_name, load, check) => {
+    check(await load());
   });
 });

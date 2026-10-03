@@ -8,7 +8,6 @@ interface ICache {
   parent?: ICache;
 }
 
-// 1 hour default cache time
 const DEFAULT_CACHE_DURATION = 1000 * 60 * 60;
 let configuredCacheDuration = DEFAULT_CACHE_DURATION;
 
@@ -24,12 +23,10 @@ export function Cached(target: any, key: string, descriptor: TypedPropertyDescri
       let cache: ICache = topCache;
       let shouldCache = false;
       if (cachingEnabled()) {
-        // only put together caches when caches are enabled
         const now = Date.now();
 
         for (const arg of args) {
-          // caches are applied to methods that take misc args, so they don't get handy query strings to hash by
-          // as a result it's a pyramid of caches indexed by the arguments passed to the query methods
+          // No query string to hash, so each argument is its own cache level.
           let nextCache = cache.map.get(arg);
           if (!nextCache) {
             nextCache = { key: arg, map: new Map(), time: 0 };
@@ -66,6 +63,7 @@ export function Cached(target: any, key: string, descriptor: TypedPropertyDescri
 
 function deleteCacheValue(cache: ICache) {
   delete cache.value;
+  cache.time = 0;
   if (cache.map.size === 0)
     cache.parent?.map.delete(cache.key);
 }
@@ -103,14 +101,6 @@ function scheduleExpiry() {
   }, delay);
 }
 
-function getObjectsCount() {
-  return caches.length;
-}
-
-function isGarbageCollectorRunning() {
-  return expiryTimer !== undefined;
-}
-
 function clear() {
   stopExpiry();
   caches.forEach(deleteCacheValue);
@@ -124,10 +114,6 @@ function setDuration(ms: number) {
   }
 }
 
-function resetCacheDuration() {
-  setDuration(DEFAULT_CACHE_DURATION);
-}
-
 function setLimit(count: number) {
   configuredCacheLimit = count;
   while (caches.length > configuredCacheLimit)
@@ -135,16 +121,20 @@ function setLimit(count: number) {
   scheduleExpiry();
 }
 
-function resetLimit() {
-  setLimit(DEFAULT_CACHE_LIMIT);
-}
-
 export const cache = {
-  getObjectsCount,
-  isGarbageCollectorRunning,
+  getObjectsCount() {
+    return caches.length;
+  },
+  isGarbageCollectorRunning() {
+    return expiryTimer !== undefined;
+  },
   clear,
-  resetCacheDuration,
+  resetCacheDuration() {
+    setDuration(DEFAULT_CACHE_DURATION);
+  },
   setDuration,
-  resetLimit,
+  resetLimit() {
+    setLimit(DEFAULT_CACHE_LIMIT);
+  },
   setLimit,
 };

@@ -84,7 +84,7 @@ export default class MagicQuerier {
 
     if (!result) {
       lastError ??= new Error('No data');
-      (lastError as any).attempts = retries;
+      (lastError as SearchError).attempts = retries;
       throw lastError;
     }
 
@@ -109,7 +109,7 @@ export default class MagicQuerier {
       emitter.emit('data', card);
     }
 
-    if (results?.has_more && data.length !== 0) { // check if there was no data to workaround scryfall being buggy and returning true for invalid pages
+    if (results?.has_more && data.length !== 0) { // Scryfall can set has_more on an empty invalid page
       if (!emitter.cancelled) {
         if (emitter.willCancelAfterPage) emitter.cancel();
         else return this.queryPage(emitter, apiPath, query, page + 1)
