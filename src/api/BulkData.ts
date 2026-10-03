@@ -11,11 +11,9 @@ export interface BulkDataDefinition {
   type: BulkDataType;
   name: string;
   description: string;
-  download_uri: string;
+  jsonl_download_uri: string;
   updated_at: string;
-  size: number;
-  content_type: string;
-  content_encoding: string;
+  compressed_size: number;
 }
 
 class BulkData extends MagicQuerier {
@@ -65,14 +63,14 @@ class BulkData extends MagicQuerier {
     if (new Date(lastDownload).getTime() > new Date(definition.updated_at).getTime())
       return undefined;
 
-    const result = await fetch(definition.download_uri, {
+    const result = await fetch(definition.jsonl_download_uri, {
       method: 'GET',
       headers: {
         ...!MagicQuerier.agent
-? undefined
-: {
-          'User-Agent': MagicQuerier.agent,
-        },
+          ? undefined
+          : {
+            'User-Agent': MagicQuerier.agent,
+          },
         Accept: '*/*',
       },
     });

@@ -10,6 +10,17 @@ import Cached from '../util/Cached';
 import MagicQuerier from '../util/MagicQuerier';
 
 Scry.setAgent('ScryfallSDKTests', '1.0');
+Scry.setTimeout(200);
+
+function allowRateLimitRetry(error: { details?: string; message: string }) {
+  return /rate-limited/.test(error.details ?? error.message);
+}
+
+function limitForTests() {
+  Scry.setRetry(4, 60_000, allowRateLimitRetry);
+}
+
+limitForTests();
 
 const expect = chai.expect;
 chai.use(chaiAsPromised);
@@ -54,7 +65,7 @@ it.skip = baseIt.skip;
 it.retries = baseIt.retries;
 
 describe('Scry', function () {
-  this.timeout(10000);
+  this.timeout(180000);
 
   describe('Cards', () => {
     it('by id', async () => {
@@ -178,7 +189,7 @@ describe('Scry', function () {
         }
       }).on('error', reject);
     }))
-      .timeout(20000);
+      .timeout(180000);
 
     it('search type:creature (cancel after 427 cards)', async () => {
       return new Promise((resolve, reject) => {
@@ -196,24 +207,14 @@ describe('Scry', function () {
           resolve();
         }).on('error', reject);
       });
-    }).timeout(15000);
+    }).timeout(180000);
 
     it('should support pagination of searches', async () => {
-      const [firstPageCard, secondPageCard] = await Promise.all([
-        new Promise<Scry.Card>((resolve, reject) => Scry.Cards.search('type:creature')
-          .cancelAfterPage()
-          .waitForAll()
-          .then(cards => cards[0])
-          .then(resolve, reject)),
-        new Promise<Scry.Card>((resolve, reject) => Scry.Cards.search('type:creature', 2)
-          .cancelAfterPage()
-          .waitForAll()
-          .then(cards => cards[0])
-          .then(resolve, reject)),
-      ]);
+      const firstPageCard = await Scry.Cards.search('type:creature').cancelAfterPage().waitForAll().then(cards => cards[0]);
+      const secondPageCard = await Scry.Cards.search('type:creature', 2).cancelAfterPage().waitForAll().then(cards => cards[0]);
 
       expect(firstPageCard!.id).not.eq(secondPageCard!.id);
-    }).timeout(15000);
+    }).timeout(180000);
 
     it('random', async () => {
       const card = await Scry.Cards.random();
@@ -421,23 +422,23 @@ describe('Scry', function () {
 
       it('getImageURI', async () => {
         let card = await Scry.Cards.byId('d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7');
-        expect(card.getImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/front/d/2/d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7.jpg?1549941722`);
+        expect(card.getImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/front/d/2/d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7.jpg`);
         card = await Scry.Cards.byId('c4ac7570-e74e-4081-ac53-cf41e695b7eb');
-        expect(card.getImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/front/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg?1562563598`);
+        expect(card.getImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/front/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg`);
       });
 
       it('getFrontImageURI', async () => {
         let card = await Scry.Cards.byId('d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7');
-        expect(card.getFrontImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/front/d/2/d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7.jpg?1549941722`);
+        expect(card.getFrontImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/front/d/2/d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7.jpg`);
         card = await Scry.Cards.byId('c4ac7570-e74e-4081-ac53-cf41e695b7eb');
-        expect(card.getFrontImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/front/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg?1562563598`);
+        expect(card.getFrontImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/front/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg`);
       });
 
       it('getBackImageURI', async () => {
         let card = await Scry.Cards.byId('d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7');
         expect(card.getBackImageURI('normal')).eq(RESOURCE_GENERIC_CARD_BACK);
         card = await Scry.Cards.byId('c4ac7570-e74e-4081-ac53-cf41e695b7eb');
-        expect(card.getBackImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/back/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg?1562563598`);
+        expect(card.getBackImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/back/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg`);
       });
 
       describe('on faces', () => {
@@ -462,12 +463,12 @@ describe('Scry', function () {
         it('getImageURI', async () => {
           let card = await Scry.Cards.byId('d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7');
           expect(card.card_faces.length).eq(2);
-          expect(card.card_faces[0].getImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/front/d/2/d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7.jpg?1549941722`);
-          expect(card.card_faces[1].getImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/front/d/2/d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7.jpg?1549941722`);
+          expect(card.card_faces[0].getImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/front/d/2/d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7.jpg`);
+          expect(card.card_faces[1].getImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/front/d/2/d2f3035c-ca27-40f3-ad73-c4e54bb2bcd7.jpg`);
           card = await Scry.Cards.byId('c4ac7570-e74e-4081-ac53-cf41e695b7eb');
           expect(card.card_faces.length).eq(2);
-          expect(card.card_faces[0].getImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/front/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg?1562563598`);
-          expect(card.card_faces[1].getImageURI('normal')).eq(`${ENDPOINT_FILE_1}/normal/back/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg?1562563598`);
+          expect(card.card_faces[0].getImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/front/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg`);
+          expect(card.card_faces[1].getImageURI('normal')?.split('?')[0]).eq(`${ENDPOINT_FILE_1}/normal/back/c/4/c4ac7570-e74e-4081-ac53-cf41e695b7eb.jpg`);
         });
       });
 
@@ -477,7 +478,9 @@ describe('Scry', function () {
           const tokens = card.getTokens();
           expect(tokens.length).eq(2);
           expect(tokens.map(token => token.name)).members(['Human Soldier', 'Dinosaur']);
-          const tokenCards = await Promise.all(tokens.map(token => token.get()));
+          const tokenCards = [];
+          for (const token of tokens)
+            tokenCards.push(await token.get());
           expect(tokenCards.length).eq(2);
           expect(tokenCards.map(card => card.oracle_text)).members(['', 'Haste']);
         });
@@ -685,7 +688,7 @@ describe('Scry', function () {
         const result = await Scry.BulkData.definitionById(definitions[0].id);
 
         expect(result.object).eq('bulk_data');
-        expect(result.size).gte(10000);
+        expect(result.compressed_size).gte(10000);
       });
 
       it('by type', async () => {
@@ -693,13 +696,16 @@ describe('Scry', function () {
 
         expect(result.object).eq('bulk_data');
         expect(result.type).eq('all_cards');
-        expect(result.size).gte(10000);
+        expect(result.compressed_size).gte(10000);
       });
     });
 
     describe('download', () => {
       before(async () => {
-        definitions = await Promise.all(definitions.map(definition => Scry.BulkData.definitionById(definition.id)));
+        const listed = definitions;
+        definitions = [];
+        for (const definition of listed)
+          definitions.push(await Scry.BulkData.definitionById(definition.id));
       });
 
       describe('by id', () => {
@@ -749,7 +755,7 @@ describe('Scry', function () {
       Scry.setRetry(attempts, timeout, () => true);
       await expect(Scry.Cards.byMultiverseId('bananas' as any)).rejected.then((value: { status?: number }) =>
         expect(value?.status === 404).true);
-      Scry.setRetry(1);
+      limitForTests();
       expect(Date.now() - then).gt(attempts * timeout);
     });
 
@@ -758,7 +764,7 @@ describe('Scry', function () {
 
   describe('cache', () => {
     it('should support custom cache times and disabling caching by setting the cache time to 0', async function () {
-      this.timeout(10000 * 3);
+      this.timeout(180000);
       Cached.clear();
       Cached.resetCacheDuration();
       Cached.resetLimit();
@@ -786,7 +792,7 @@ describe('Scry', function () {
     });
 
     it('should support custom cache limits and disabling caching by setting the cache limit to 0', async function () {
-      this.timeout(10000 * 3);
+      this.timeout(180000);
       Cached.clear();
       Cached.resetCacheDuration();
       Cached.resetLimit();

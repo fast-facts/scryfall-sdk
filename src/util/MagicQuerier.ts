@@ -103,15 +103,10 @@ export default class MagicQuerier {
   }
 
   private async tryQuery(apiPath: string, query?: Record<string, any>, post?: any) {
-    const now = Date.now();
-    const timeSinceLastQuery = now - lastQuery;
-    if (timeSinceLastQuery >= MagicQuerier.timeout) {
-      lastQuery = now;
-    } else {
-      const timeUntilNextQuery = MagicQuerier.timeout - timeSinceLastQuery;
-      lastQuery += timeUntilNextQuery;
-      await sleep(timeUntilNextQuery);
-    }
+    const wait = Math.max(0, lastQuery + MagicQuerier.timeout - Date.now());
+    lastQuery = Date.now() + wait;
+    if (wait)
+      await sleep(wait);
 
     MagicQuerier.requestCount++;
 
@@ -128,10 +123,10 @@ export default class MagicQuerier {
       headers: {
         'Content-Type': 'application/json',
         ...!MagicQuerier.agent
-? undefined
-: {
-          'User-Agent': MagicQuerier.agent,
-        },
+          ? undefined
+          : {
+            'User-Agent': MagicQuerier.agent,
+          },
         Accept: '*/*',
       },
       method: post ? 'POST' : 'GET',
