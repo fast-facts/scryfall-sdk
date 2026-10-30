@@ -30,7 +30,7 @@
 		"eslint-config-final": "1.11.0",
 		"typescript": "6.0.3",
 		"typescript-eslint": "8.71.0",
-		"vitest": "5.0.3"
+		"vitest": "5.0.5"
 	},
 	"scripts": {
 		"build": "rm -rf dist && tsc -p tsconfig.app.json && cp package.json README.md LICENSE DOCUMENTATION.md ROUTES.md dist",
