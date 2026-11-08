@@ -49,7 +49,10 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
-      - run: npm install --no-save --no-package-lock @vitest/browser-playwright@5.0.3 playwright@1.63.0
+      # A pinned version fails the peer check when Vitest updates.
+      - run: |
+          version=$(node -p 'require("vitest/package.json").version')
+          npm install --no-save --no-package-lock "@vitest/browser-playwright@$version" playwright@1.63.0
       - run: npx playwright install --with-deps chromium
       - name: Write browser config
         run: |
