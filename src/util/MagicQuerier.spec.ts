@@ -25,23 +25,24 @@ describe('request spacing', () => {
 });
 
 describe('agent header', () => {
-  it('joins the name and version', () => {
+  it('sets the agent and sends it only outside a browser', () => {
     const previous = MagicQuerier.agent;
     try {
       Scry.setAgent('Name', '2');
       expect(MagicQuerier.agent).toBe('Name/2');
+      if ('window' in globalThis) {
+        expect(MagicQuerier.agentHeader()).toBeUndefined();
+        return;
+      }
       expect(MagicQuerier.agentHeader()).toEqual({ 'User-Agent': 'Name/2' });
+      vi.stubGlobal('window', {});
+      try {
+        expect(MagicQuerier.agentHeader()).toBeUndefined();
+      } finally {
+        vi.unstubAllGlobals();
+      }
     } finally {
       MagicQuerier.agent = previous;
-    }
-  });
-
-  it('omits the agent in a browser', () => {
-    vi.stubGlobal('window', {});
-    try {
-      expect(MagicQuerier.agentHeader()).toBeUndefined();
-    } finally {
-      vi.unstubAllGlobals();
     }
   });
 });
